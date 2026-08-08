@@ -42,11 +42,14 @@ There is no test suite — verify changes by running `npm run dev` and checking 
 - **Images must be imported** in `src/data/assets.ts`, never referenced as `'src/data/images/...'` strings — string paths silently 404 in production builds.
 - **Tailwind v4 is CSS-first.** There is no `tailwind.config.js`; theme changes go in the `@theme` block in `src/index.css`. Don't add global `h1`/`h2`/`p` rules there — typography belongs to `DESIGN_TOKENS`.
 - **Don't create a second version of an existing component.** Wire up or fix the one that exists; if two are genuinely needed, ask which is canonical.
-- **`CANDLE_CATEGORIES` is the source of truth.** Don't rename ids and don't change the hierarchy — ids are URL slugs and are referenced by promo slides.
+- **`CANDLE_CATEGORIES` is the source of truth.** Don't rename ids and don't change the hierarchy — ids are URL slugs and are referenced by promo slides. Every slide's `targetCollectionId` is checked against it on import by `assertTargetsResolve()` in `src/data/promotions.ts`, which throws in dev only; a new dataset must be added to that list or its ids go unchecked. An unknown slug redirects to `/collections`, so a broken CTA still *looks* like it worked — this is why the check exists rather than another comment.
+- **Cross-cutting groupings are not categories.** "Gifting" lives in `data/promotions.ts` and maps onto existing ids. Don't add it to `CANDLE_CATEGORIES`.
 - **No cards-and-grids for content.** Collections and varieties are told as full-bleed scroll moments, not repeated tiles. Each of the six collections gets its *own* treatment, not the same effect six times.
 - **Every animated component needs a reduced-motion branch** — skip the pin, skip the autoplay, `clearProps` so nothing is stranded invisible. Animate transforms and opacity, never layout properties.
 - **Nothing is persisted before OTP verification.** `lib/verification.ts` owns both the code check and the write in one call so the ordering can't be bypassed; add backends by implementing `VerificationProvider`, not by calling out from the form.
 - **lucide-react v1 has no brand icons** (no Instagram/Facebook/YouTube/LinkedIn). Use a generic glyph with an `aria-label`, or add `simple-icons` deliberately.
+- **`Draggable`/`InertiaPlugin` are free (GSAP 3.13+) but must be dynamically imported.** They're ~117 KB of source; a static import in `PromoCarouselTemplate3` took the landing chunk from 22 KB to 88 KB. Guard the async gap with a `cancelled` flag so a Draggable created after teardown still gets killed. Check the built chunk sizes after touching a GSAP plugin import.
+- **The home page is full-bleed** — `/` and `/collections` opt out of `PageShell` and contain per section. Adding a section means keeping the alternating image-led / type-led rhythm; see [`docs/architecture.md`](docs/architecture.md#home-page-composition).
 
 ## Known gaps
 
