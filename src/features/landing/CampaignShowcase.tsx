@@ -144,10 +144,12 @@ export const CampaignShowcase: React.FC = () => {
               span
             )}
           >
-            {/* Warm corner wash — firelight, not a second accent hue. */}
+            {/* Warm corner wash — firelight, not a second accent hue. Rests
+                dimmed and brightens on hover; `opacity-150` doesn't exist, so
+                the wash previously never changed. */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-amber-500/20 blur-3xl transition-opacity duration-700 group-hover:opacity-150 dark:bg-amber-500/10"
+              className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-amber-500/20 opacity-60 blur-3xl transition-opacity duration-700 group-hover:opacity-100 dark:bg-amber-500/10"
             />
 
             <div className="relative space-y-4">
