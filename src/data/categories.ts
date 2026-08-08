@@ -1,31 +1,45 @@
 import type { Category } from '../types/category';
 import { ASSET_IMAGES } from '../data/assets';
 
+/**
+ * CANDLE_CATEGORIES is the single content source for the whole site — the
+ * landing showcase, the collections story, and every subcategory experience
+ * render from this array. `id` values are URL slugs, so renaming one breaks
+ * existing links and any `PromoSlide.targetCollectionId` pointing at it.
+ *
+ * `visual` gives each subcategory its own wax tone, vessel silhouette, and label
+ * note, so the procedural candle depicts the variety being described rather than
+ * one generic jar. Tones are wax and glass neutrals only — amber stays reserved
+ * as the sole accent colour.
+ */
 export const CANDLE_CATEGORIES: Category[] = [
   {
     id: "bespoke-personalized",
     title: 'Bespoke & Personalized',
-    tagline: 'Crafted for your uniquely cherished moemnts.',
-    description: 'Custom fragrance blends, custome name labels, and photo-embedded candles designed to capture your personal story.',
+    tagline: 'Crafted for your uniquely cherished moments.',
+    description: 'Custom fragrance blends, custom name labels, and photo-embedded candles designed to capture your personal story.',
     heroImage: ASSET_IMAGES.categories.bespoke,
     subCategories: [
       {
         id: 'custom-fragrance-blends',
         name: 'Custom Fragrance Blends',
         description: 'Create a scent that is uniquely yours, blending your favorite aromas into a signature fragrance.',
-        examples: ['Lavender & Vanilla', 'Citrus & Sage', 'Rose & Sandalwood']
+        examples: ['Lavender & Vanilla', 'Citrus & Sage', 'Rose & Sandalwood'],
+        visual: { vessel: 'jar', waxFrom: '#efe7dc', waxTo: '#cbbca6', labelNote: 'Signature Blend' },
       },
       {
         id: 'personalized-name-labels',
         name: 'Personalized Name Labels',
         description: 'Add a personal touch with custom labels featuring names, dates, or special messages.',
-        examples: ['John & Jane - 10.10.2023', 'Happy Birthday, Alex!', 'Our Wedding Day - 05.05.2024']
+        examples: ['John & Jane - 10.10.2023', 'Happy Birthday, Alex!', 'Our Wedding Day - 05.05.2024'],
+        visual: { vessel: 'jar', waxFrom: '#f5f0e8', waxTo: '#d8ccb8', labelNote: 'Your Name Here' },
       },
       {
         id: 'photo-embedded-candles',
         name: 'Photo-Embedded Candles',
         description: 'Incorporate cherished photos into your candle design, creating a keepsake that illuminates memories.',
-        examples: ['Family Portrait Candle', 'Pet Photo Candle', 'Vacation Memory Candle']
+        examples: ['Family Portrait Candle', 'Pet Photo Candle', 'Vacation Memory Candle'],
+        visual: { vessel: 'pillar', waxFrom: '#f7f3ec', waxTo: '#cfc3b0', labelNote: 'Memory Keepsake' },
       }
     ]
   },
@@ -40,19 +54,22 @@ export const CANDLE_CATEGORIES: Category[] = [
         id: 'scented-soy-wax',
         name: 'Scented Soy/Wax Jars',
         description: 'Clean burning soy wax with comforting scents.',
-        examples: ['Wooden wick jars', 'Frosted glass jars', 'Tin containers'] //[cite: 1]
+        examples: ['Wooden wick jars', 'Frosted glass jars', 'Tin containers'],
+        visual: { vessel: 'jar', waxFrom: '#f1ece2', waxTo: '#c9bda9', labelNote: 'Pure Soy Wax' },
       },
       {
         id: 'minimalist-frosted-glass',
         name: 'Minimalist Frosted Glass',
         description: 'Sleek and modern frosted glass containers for a contemporary aesthetic.',
-        examples: ['Frosted glass jars', 'Matte finish containers', 'Translucent candle holders'] //[cite: 2]
+        examples: ['Frosted glass jars', 'Matte finish containers', 'Translucent candle holders'],
+        visual: { vessel: 'jar', waxFrom: '#eef1f2', waxTo: '#c3cbd0', labelNote: 'Frosted Glass' },
       },
       {
         id: 'rustic-wooden-wicks',
         name: 'Rustic Wooden Wicks',
         description: 'Experience the soothing crackle of wooden wicks in our rustic candle collection.',
-        examples: ['Wooden wick candles', 'Rustic jar candles', 'Hand-poured wooden wick blends'] //[cite: 3]
+        examples: ['Wooden wick candles', 'Rustic jar candles', 'Hand-poured wooden wick blends'],
+        visual: { vessel: 'jar', waxFrom: '#e8dcc8', waxTo: '#b39b78', labelNote: 'Crackling Wood Wick' },
       }
     ]
   },
@@ -67,19 +84,22 @@ export const CANDLE_CATEGORIES: Category[] = [
         id: 'beverage-food',
         name: 'Beverage / Food Mimicking',
         description: 'Sculpted wax art crafted to resemble delightful drinks and treats.',
-        examples: ['Smoothie candles', 'Dessert candles', 'Cocktail-inspired candles'] //[cite: 1]
+        examples: ['Smoothie candles', 'Dessert candles', 'Cocktail-inspired candles'],
+        visual: { vessel: 'sculpture', waxFrom: '#f6e6d8', waxTo: '#d9a68b', labelNote: 'Gourmet Wax Art' },
       },
       {
         id: 'playful-sculptures',
         name: 'Playful Sculptures',
         description: 'Whimsical candle designs that bring a touch of fun and creativity to your space.',
-        examples: ['Animal-shaped candles', 'Abstract art candles', 'Miniature scene candles'] //[cite: 2]
+        examples: ['Animal-shaped candles', 'Abstract art candles', 'Miniature scene candles'],
+        visual: { vessel: 'sculpture', waxFrom: '#f3ece4', waxTo: '#c8b6a4', labelNote: 'Hand Sculpted' },
       },
       {
         id: 'luxury-decorative',
         name: 'Luxury Decorative Candles',
         description: 'Exquisite decorative pieces that elevate your home decor.',
-        examples: ['Gold leaf candles', 'Marble effect candles', 'Hand-painted decorative candles'] //[cite: 3]
+        examples: ['Gold leaf candles', 'Marble effect candles', 'Hand-painted decorative candles'],
+        visual: { vessel: 'pillar', waxFrom: '#f4f2ee', waxTo: '#bfb6a8', labelNote: 'Marble & Gold Leaf' },
       }
     ]
   },
@@ -94,19 +114,22 @@ export const CANDLE_CATEGORIES: Category[] = [
         id: 'urli-diya',
         name: 'Urli & Diya Candles',
         description: 'Festive handcrafted brass and floral candles.',
-        examples: ['Festive brass urlis', 'Floral wax diyas', 'Seasonal releases'] //[cite: 1]
+        examples: ['Festive brass urlis', 'Floral wax diyas', 'Seasonal releases'],
+        visual: { vessel: 'urli', waxFrom: '#e6d3ae', waxTo: '#a8813f', labelNote: 'Handcrafted Brass' },
       },
       {
         id: 'floral-embedded-wax',
         name: 'Floral Embedded Wax Candles',
         description: 'Wax candles embedded with real flowers for a natural and elegant look.',
-        examples: ['Rose embedded candles', 'Marigold wax candles', 'Jasmine floral candles'] //[cite: 2]
+        examples: ['Rose embedded candles', 'Marigold wax candles', 'Jasmine floral candles'],
+        visual: { vessel: 'pillar', waxFrom: '#f6ece6', waxTo: '#cfa89c', labelNote: 'Real Pressed Petals' },
       },
       {
         id: 'exclusive-seasonal-releases',
         name: 'Exclusive Seasonal Releases',
         description: 'Limited edition candles designed for special occasions and festivals.',
-        examples: ['Diwali special edition', 'Christmas limited release', 'Easter seasonal collection'] //[cite: 3]
+        examples: ['Diwali special edition', 'Christmas limited release', 'Easter seasonal collection'],
+        visual: { vessel: 'urli', waxFrom: '#eddcbe', waxTo: '#b08d52', labelNote: 'Limited Edition' },
       }
     ]
   },
@@ -121,19 +144,22 @@ export const CANDLE_CATEGORIES: Category[] = [
         id: 'sand-botanical',
         name: 'Sand Wax & Botanical',
         description: 'Interactive granulated wax and floral embeds.',
-        examples: ['Granulated wax setups', 'Embedded flower candles'] //[cite: 1]
+        examples: ['Granulated wax setups', 'Embedded flower candles'],
+        visual: { vessel: 'raw', waxFrom: '#f0e4cd', waxTo: '#c9ab7d', labelNote: 'Granulated Sand Wax' },
       },
       {
         id: 'dried-flower-embedded',
         name: 'Dried Flower Embedded Candles',
         description: 'Candles with real dried flowers embedded for a natural and elegant look.',
-        examples: ['Rose embedded candles', 'Lavender wax candles', 'Daisy floral candles'] //[cite: 2]
+        examples: ['Rose embedded candles', 'Lavender wax candles', 'Daisy floral candles'],
+        visual: { vessel: 'pillar', waxFrom: '#f2ebe4', waxTo: '#c4b2a6', labelNote: 'Dried Botanicals' },
       },
       {
         id: 'innovative-wax-designs',
         name: 'Innovative Wax Designs',
         description: 'Unique and creative wax designs that push the boundaries of traditional candle making.',
-        examples: ['Geometric wax candles', 'Layered color wax designs', 'Sculptural wax art'] //[cite: 3]
+        examples: ['Geometric wax candles', 'Layered color wax designs', 'Sculptural wax art'],
+        visual: { vessel: 'sculpture', waxFrom: '#eceef0', waxTo: '#b0b6bd', labelNote: 'Geometric Form' },
       }
     ]
   },
@@ -148,25 +174,29 @@ export const CANDLE_CATEGORIES: Category[] = [
         id: 'wax',
         name: 'Wax',
         description: 'High-quality soy wax for candle making.',
-        examples: ['Sand wax', 'Soy wax', 'Gell Wax', 'Paraffin Wax'] //[cite: 1]
+        examples: ['Sand wax', 'Soy wax', 'Gell Wax', 'Paraffin Wax'],
+        visual: { vessel: 'raw', waxFrom: '#f4efe6', waxTo: '#cdc2ae', labelNote: 'Bulk Wax Flakes' },
       },
       {
         id: 'wicks',
         name: 'Wicks',
         description: 'High-quality wicks for candle making.',
-        examples: ['Cotton wicks', 'Wooden wicks', 'Soy wax wicks'] //[cite: 2]
+        examples: ['Cotton wicks', 'Wooden wicks', 'Soy wax wicks'],
+        visual: { vessel: 'raw', waxFrom: '#efe8db', waxTo: '#bfae94', labelNote: 'Cotton & Wood Wicks' },
       },
       {
         id: 'moulds-and-containers',
         name: 'Moulds & Containers',
         description: 'High-quality moulds and containers for candle making.',
-        examples: ['Silicone moulds', 'Glass jars', 'Metal containers'] //[cite: 3]
+        examples: ['Silicone moulds', 'Glass jars', 'Metal containers'],
+        visual: { vessel: 'raw', waxFrom: '#eaedef', waxTo: '#b6bec5', labelNote: 'Moulds & Vessels' },
       },
       {
         id: 'fragrance-oils',
         name: 'Fragrance Oils',
         description: 'High-quality fragrance oils for candle making.',
-        examples: ['Lavender', 'Vanilla', 'Citrus', 'Rose'] //[cite: 4]
+        examples: ['Lavender', 'Vanilla', 'Citrus', 'Rose'],
+        visual: { vessel: 'raw', waxFrom: '#f1e9d9', waxTo: '#c7ac83', labelNote: 'Pure Fragrance Oils' },
       }
     ]
   }

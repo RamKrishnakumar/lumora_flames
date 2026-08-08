@@ -1,150 +1,177 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Navigate } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useParams,
+  Navigate,
+} from 'react-router-dom';
 
-// Theme
 import { ThemeProvider } from './context';
-
-// Design Token Imports
 import { DESIGN_TOKENS } from './theme/designSystem';
-
-// Data Source
 import { CANDLE_CATEGORIES } from './data/categories';
 
-// Feature Components
-import { LandingHero } from './features/landing/LandingHero';
-import { CollectionsStoryView } from './features/categories/CollectionsStoryView';
-import { CollectionsView } from './features/categories/CollectionsView';
-import { CategoryDetail } from './features/categories/CategoryDetail';
-import { ScrollInteractiveShowcase } from './features/landing/ScrollInteractiveShowcase';
-import { ContactFormWorkflow } from './features/contact/ContactFormWorkflow';
-
-// UI Layout Components
 import { Navbar } from './components/layout/Navbar';
+import { Footer } from './components/layout/Footer';
+import { PageTransition } from './components/layout/PageTransition';
+import { ErrorBoundary } from './components/layout/ErrorBoundary';
 import { AmbientFlameGlow } from './components/ui/AmbientFlameGlow';
+import { RouteFallback } from './components/ui/RouteFallback';
+
+/*
+ * Route components are lazy so each page ships as its own chunk. This matters
+ * more here than in a typical app: the collection photography is imported by the
+ * data module, so an eagerly-imported route drags several megabytes of PNG into
+ * the initial bundle.
+ *
+ * Named exports are re-mapped to `default` because `lazy` requires a module with
+ * a default export, and the house convention is named exports only.
+ */
+const LandingHero = lazy(() =>
+  import('./features/landing/LandingHero').then((m) => ({ default: m.LandingHero }))
+);
+const CollectionsStoryView = lazy(() =>
+  import('./features/categories/CollectionsStoryView').then((m) => ({
+    default: m.CollectionsStoryView,
+  }))
+);
+const SubCategoryShowcase = lazy(() =>
+  import('./features/categories/SubCategoryShowcase').then((m) => ({
+    default: m.SubCategoryShowcase,
+  }))
+);
+const AboutStory = lazy(() =>
+  import('./features/about/AboutStory').then((m) => ({ default: m.AboutStory }))
+);
+const ContactFormWorkflow = lazy(() =>
+  import('./features/contact/ContactFormWorkflow').then((m) => ({
+    default: m.ContactFormWorkflow,
+  }))
+);
+
+/** Standard page shell: max width, gutters, and clearance for the fixed navbar. */
+const PageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <main className="min-h-screen">
+    <div
+      className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX} ${DESIGN_TOKENS.layout.headerOffset}`}
+    >
+      {children}
+    </div>
+  </main>
+);
 
 /* ==========================================================================
-   1. HOME PAGE (/)
+   1. HOME (/)
    ========================================================================== */
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} pb-20`}>
-      <div className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX}`}>
-        <LandingHero onSelectCategory={(id) => navigate(`/category/${id}`)} />
-      </div>
-    </main>
+    <PageShell>
+      <LandingHero onSelectCategory={(id) => navigate(`/category/${id}`)} />
+    </PageShell>
   );
 };
 
 /* ==========================================================================
-   2. SCROLL STORY COLLECTIONS (/collections)
+   2. COLLECTIONS STORY (/collections)
+   Full-bleed and self-pinning, so it opts out of PageShell's gutters.
    ========================================================================== */
 const CollectionsPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <main className="min-h-screen pt-20">
+    <main className="min-h-screen">
       <CollectionsStoryView onOpenSubCategory={(id) => navigate(`/category/${id}`)} />
     </main>
   );
 };
 
 /* ==========================================================================
-   3. SEARCHABLE CATALOG (/catalog)
-   ========================================================================== */
-const CatalogPage: React.FC = () => {
-  const navigate = useNavigate();
-
-  return (
-    <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} pb-20`}>
-      <div className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX}`}>
-        <CollectionsView onSelectCategory={(id) => navigate(`/category/${id}`)} />
-      </div>
-    </main>
-  );
-};
-
-/* ==========================================================================
-   4. SCROLL-PINNED CATEGORY EXPERIENCE (/category/:categoryId)
+   3. SUBCATEGORY EXPERIENCE (/category/:categoryId)
    ========================================================================== */
 const SubCategoryPage: React.FC = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
 
-  const selectedCategory = CANDLE_CATEGORIES.find((c) => c.id === categoryId);
+  const category = CANDLE_CATEGORIES.find((c) => c.id === categoryId);
 
-  // Unknown slug: fall back to the catalog rather than silently showing collection #1.
-  if (!selectedCategory) return <Navigate to="/catalog" replace />;
+  // Unknown slug: send to the collections story rather than silently showing #1.
+  if (!category) return <Navigate to="/collections" replace />;
 
   return (
-    <main className="min-h-screen pt-20">
-      <ScrollInteractiveShowcase
-        selectedCategory={selectedCategory}
-        onSelectCategory={(id) => navigate(`/category/${id}/details`)}
+    <main className="min-h-screen">
+      <SubCategoryShowcase
+        category={category}
+        onBack={() => navigate('/collections')}
+        onOrderCustom={(subject) => navigate('/contact', { state: { categoryTitle: subject } })}
       />
     </main>
   );
 };
 
 /* ==========================================================================
-   5. CATEGORY DETAIL BREAKDOWN (/category/:categoryId/details)
+   4. BRAND STORY (/about)
    ========================================================================== */
-const CategoryDetailPage: React.FC = () => {
-  const { categoryId } = useParams<{ categoryId: string }>();
-  const navigate = useNavigate();
-
-  const category = CANDLE_CATEGORIES.find((c) => c.id === categoryId);
-
-  if (!category) return <Navigate to="/catalog" replace />;
-
-  return (
-    <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} pb-20`}>
-      <div className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX}`}>
-        <CategoryDetail
-          category={category}
-          onBack={() => navigate('/catalog')}
-          onOrderCustom={(categoryTitle) => navigate('/contact', { state: { categoryTitle } })}
-        />
-      </div>
-    </main>
-  );
-};
+const AboutPage: React.FC = () => (
+  <PageShell>
+    <AboutStory />
+  </PageShell>
+);
 
 /* ==========================================================================
-   6. CONTACT & OTP VERIFICATION PAGE (/contact)
+   5. CONTACT & OTP VERIFICATION (/contact)
    ========================================================================== */
 const ContactPage: React.FC = () => (
-  <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} py-12 px-4`}>
+  <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} px-4 pb-24`}>
     <ContactFormWorkflow />
   </main>
 );
 
 /* ==========================================================================
-   7. MASTER APP COMPONENT
+   6. MASTER APP
    ========================================================================== */
 export default function App() {
   return (
-    <ThemeProvider>
-      <Router>
-        <div className="relative w-full min-h-screen transition-colors duration-500 bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
-          <AmbientFlameGlow />
+    <ErrorBoundary>
+      <ThemeProvider>
+        <Router>
+          <div className="relative min-h-screen w-full bg-stone-50 text-stone-900 transition-colors duration-500 dark:bg-stone-950 dark:text-stone-100">
+            <AmbientFlameGlow />
 
-          <div className="relative z-10">
-            <Navbar />
+            <div className="relative z-10">
+              <Navbar />
 
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/collections" element={<CollectionsPage />} />
-              <Route path="/catalog" element={<CatalogPage />} />
-              <Route path="/category/:categoryId" element={<SubCategoryPage />} />
-              <Route path="/category/:categoryId/details" element={<CategoryDetailPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+              <PageTransition>
+                <Suspense fallback={<RouteFallback />}>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/collections" element={<CollectionsPage />} />
+                    <Route path="/category/:categoryId" element={<SubCategoryPage />} />
+                    {/*
+                      Retired routes. `/catalog` was a searchable card grid that
+                      duplicated the home page's layout, and `/category/:id/details`
+                      listed the same varieties the subcategory experience now
+                      walks through. Both redirect so existing links keep working.
+                    */}
+                    <Route path="/catalog" element={<Navigate to="/collections" replace />} />
+                    <Route
+                      path="/category/:categoryId/details"
+                      element={<Navigate to="/collections" replace />}
+                    />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
+              </PageTransition>
+
+              <Footer />
+            </div>
           </div>
-        </div>
-      </Router>
-    </ThemeProvider>
+        </Router>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

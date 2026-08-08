@@ -55,13 +55,18 @@ Buttons use `text-xs font-semibold uppercase tracking-wider` — never sentence-
 
 GSAP only, always inside `useGSAP` with a `scope`.
 
-- Entrances: `power3.out`, 0.5–0.8s, staggered 0.08–0.12s.
-- Ambient loops: `sine.inOut` with `repeat: -1, yoyo: true`.
-- Hover: 0.6s `power2.out` scale (see `CategoryCard`).
-- Scroll: `ScrollTrigger` with `scrub: 0.8–1`; use `pin` sparingly — at most one pinned section per page.
-- Flicker: short 0.15s randomised yoyo tweens (see `InteractiveCandleCanvas`).
+Named eases, durations, stagger, and the reveal helpers live in [`lib/animations.ts`](../src/lib/animations.ts) (`EASE`, `DURATION`, `STAGGER`, `revealUp`, `wipeIn`, `kenBurns`, `flicker`, `settleInstantly`). Use those rather than retyping ease strings.
 
-Gate anything decorative behind `useReducedMotion()`.
+- Entrances: `EASE.enter` (`power3.out`), 0.5–0.8s, staggered `STAGGER` (0.09s).
+- Exits: `EASE.exit` (`power2.in`), ~0.22s — always shorter than the entrance.
+- Ambient loops: `EASE.ambient` (`sine.inOut`) with `repeat: -1, yoyo: true`.
+- Hover: 0.6s `power2.out` scale (see `CollectionShowcase`).
+- Scroll: `ScrollTrigger` with `scrub: 0.8–1`; use `pin` sparingly — at most one pinned section per page. `CollectionsStoryView` is the exception: it pins each of six sections in sequence, which reads as one continuous pin.
+- Flicker: short 0.15s randomised yoyo tweens — use `flicker()` (see `InteractiveCandleCanvas`).
+
+**Animate transforms and opacity, never layout.** To parallax an image, scrub `yPercent` on an oversized element (`h-[118%] -translate-y-[8%]`) rather than animating `top` or `height`; to draw a timeline rule, scrub `scaleY` with `origin-top` rather than `height`.
+
+Gate anything decorative behind `useReducedMotion()`, and give it a real fallback: skip the pin, skip the autoplay, and `gsap.set(targets, { clearProps: 'all' })` (or `settleInstantly`) so nothing is stranded at `opacity: 0`.
 
 ## Checklist for new UI
 

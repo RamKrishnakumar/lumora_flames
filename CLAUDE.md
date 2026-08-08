@@ -42,9 +42,16 @@ There is no test suite — verify changes by running `npm run dev` and checking 
 - **Images must be imported** in `src/data/assets.ts`, never referenced as `'src/data/images/...'` strings — string paths silently 404 in production builds.
 - **Tailwind v4 is CSS-first.** There is no `tailwind.config.js`; theme changes go in the `@theme` block in `src/index.css`. Don't add global `h1`/`h2`/`p` rules there — typography belongs to `DESIGN_TOKENS`.
 - **Don't create a second version of an existing component.** Wire up or fix the one that exists; if two are genuinely needed, ask which is canonical.
+- **`CANDLE_CATEGORIES` is the source of truth.** Don't rename ids and don't change the hierarchy — ids are URL slugs and are referenced by promo slides.
+- **No cards-and-grids for content.** Collections and varieties are told as full-bleed scroll moments, not repeated tiles. Each of the six collections gets its *own* treatment, not the same effect six times.
+- **Every animated component needs a reduced-motion branch** — skip the pin, skip the autoplay, `clearProps` so nothing is stranded invisible. Animate transforms and opacity, never layout properties.
+- **Nothing is persisted before OTP verification.** `lib/verification.ts` owns both the code check and the write in one call so the ordering can't be bypassed; add backends by implementing `VerificationProvider`, not by calling out from the form.
+- **lucide-react v1 has no brand icons** (no Instagram/Facebook/YouTube/LinkedIn). Use a generic glyph with an `aria-label`, or add `simple-icons` deliberately.
 
 ## Known gaps
 
-- The OTP step in `ContactFormWorkflow` is mocked — code `123456`, with a `TODO` marking where a real Supabase/Firebase call goes. No inquiry is persisted anywhere.
-- Source photos are 2–3 MB PNGs and dominate the bundle. Converting to `.webp` and lazy-loading below-fold images is the single biggest available performance win.
-- No error boundaries, no loading states, no SEO/meta handling. `index.html` still has the default `lumora_flames` title.
+- The OTP provider is a mock — code `123456`, persists nothing. The seam is `verificationProvider` in `src/lib/verification.ts`; swap it for a Supabase/Firebase implementation of the same interface and no component changes.
+- Source photos are 2–3 MB PNGs and dominate the bundle (~19 MB of assets against a 411 KB entry chunk). Converting to `.webp` is the single biggest available performance win; routes and below-fold images are already split and lazy.
+- No SEO/meta handling. `index.html` still has the default `lumora_flames` title.
+- Social links in `Footer` point at platform roots, not real brand profiles.
+- Individual product pages don't exist yet; `SubCategoryShowcase` is the leaf of the flow.

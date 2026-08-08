@@ -10,7 +10,7 @@ The carousel uses a **data-in / template-out** split. Respect it — it's the wh
 
 | File | Role |
 | --- | --- |
-| [`PromotionalCarousel.tsx`](../src/features/landing/PromotionalCarousel.tsx) | **Smart container.** Owns `PROMO_SLIDES_DATA`, owns navigation (`navigate('/category/:id')`), and switches on the `templateStyle` prop. |
+| [`PromotionalCarousel.tsx`](../src/features/landing/PromotionalCarousel.tsx) | **Smart container.** Owns `PROMO_SLIDES_DATA` and navigation (`navigate('/category/:id')`), and renders the chosen template. |
 | [`PromoCarouselTemplate1.tsx`](../src/features/landing/PromoCarouselTemplate1.tsx) | **Dumb presentational template.** Receives `slides`, `onNavigateCollection`, `autoSlideInterval`. Knows nothing about routing or data sourcing. |
 
 ### The slide contract
@@ -33,8 +33,9 @@ export interface PromoSlide {
 ### Adding a template — the only correct way
 
 1. Create `src/features/landing/PromoCarouselTemplate2.tsx`, exporting a component with the **same props interface** as Template1.
-2. Add a `case 'template2':` to the switch in `PromotionalCarousel.tsx`.
-3. Widen the `templateStyle` union type.
+2. Add a `templateStyle?: 'template1' | 'template2'` prop to `PromotionalCarousel` and branch on it.
+
+There is deliberately **no `templateStyle` prop today** — a union member with no matching branch silently falls through to Template1, which reads as a bug. Introduce the prop in the same change that introduces the second template.
 
 Never fork `PromotionalCarousel` and never hardcode slide data inside a template. A template that can't render an arbitrary `slides` array is a bug.
 
@@ -82,7 +83,7 @@ Abandon one-slide-at-a-time: a continuously drifting row of tall portrait cards,
 **Best for:** browsing many collections; feels boutique and catalog-like.
 
 ### G. Scroll-Scrubbed Pin
-Pin the carousel and drive slide index from scroll progress instead of a timer — the exact mechanic already in [`ScrollInteractiveShowcase.tsx`](../src/features/landing/ScrollInteractiveShowcase.tsx). The user's scroll *is* the transition.
+Pin the carousel and drive slide index from scroll progress instead of a timer — the exact mechanic used by [`SubCategoryShowcase.tsx`](../src/features/categories/SubCategoryShowcase.tsx). The user's scroll *is* the transition. Copy its `activeIndexRef` guard: updating state on every scroll frame re-renders continuously, so mirror the index in a ref and only `setState` when it actually changes.
 **Best for:** a full-viewport home page centrepiece. Use at most once per page.
 
 ### H. Typographic Hero
@@ -112,7 +113,7 @@ The current three slides lean on desserts/beverages imagery. Higher-conviction a
 
 Treat these as a checklist before calling a template done.
 
-- **Accessibility.** Gate decorative motion behind `useReducedMotion()` (`src/hooks/useReducedMotion.ts`). Dot/arrow controls need `aria-label`s. Auto-advance must pause on hover and on keyboard focus. Every image needs a real `alt`.
+- **Accessibility.** Gate decorative motion behind `useReducedMotion()` (`src/hooks/useReducedMotion.ts`) — when it's set, autoplay must not start at all. Dot/arrow controls need `aria-label`s and 44×44 hit areas. Auto-advance must pause on pointer-over, on keyboard focus inside the frame (use `onFocus`/`onBlur`, which bubble, not `focus`/`blur`), and when the tab is hidden. A visible pause/play toggle is required — WCAG 2.2.2 applies to anything moving for more than five seconds. Every image needs a real `alt`. Template1 implements all of this; copy its structure.
 - **Both themes.** Verify in light *and* dark — the photos are bright, so light-mode white text over them is the usual failure. Use the `dark:` variants and a scrim.
 - **Responsive.** Layout must hold at 375px. Test that headline sizes step down (`text-4xl sm:text-6xl lg:text-7xl`) and side-by-side layouts stack.
 - **Empty and single-slide states.** Follow Template1: bail with `if (!slide) return null` and skip the auto-advance timer when `slides.length <= 1`.

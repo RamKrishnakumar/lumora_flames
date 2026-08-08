@@ -5,7 +5,12 @@ import { PromotionalCarouselTemplate1 } from './PromoCarouselTemplate1';
 import type { PromoSlide } from './PromoCarouselTemplate1';
 
 /**
- * Master Promotional Slide Data Array
+ * The live promotional placements, in display order.
+ *
+ * Each `targetCollectionId` must match an id in `CANDLE_CATEGORIES` — the CTA
+ * routes to `/category/:id`, so a typo lands the visitor on a redirect instead of
+ * the collection. Images come from `ASSET_IMAGES` rather than string paths, which
+ * would 404 in a production build.
  */
 const PROMO_SLIDES_DATA: PromoSlide[] = [
   {
@@ -13,7 +18,8 @@ const PROMO_SLIDES_DATA: PromoSlide[] = [
     tagline: 'Exclusive Festive Release',
     title: 'Illuminating Sacred',
     highlightText: 'Celebrations',
-    description: 'Handcrafted brass urlis and botanical-infused floral diyas created for memorable evenings.',
+    description:
+      'Handcrafted brass urlis and botanical-infused floral diyas created for memorable evenings.',
     bgImage: ASSET_IMAGES.promotional_one.first,
     ctaText: 'Explore Festive Urli Collection',
     targetCollectionId: 'festive-urlis',
@@ -23,7 +29,8 @@ const PROMO_SLIDES_DATA: PromoSlide[] = [
     tagline: 'Artisanal Sculpture Series',
     title: 'Gourmet Desserts &',
     highlightText: 'Smoothie Wax Art',
-    description: 'Playful yet sophisticated designs mimicking fine delicacies and refreshing smoothies.',
+    description:
+      'Playful yet sophisticated designs mimicking fine delicacies and refreshing smoothies.',
     bgImage: ASSET_IMAGES.promotional_one.second,
     ctaText: 'Discover Sculptural Art',
     targetCollectionId: 'sculptural-food',
@@ -40,50 +47,43 @@ const PROMO_SLIDES_DATA: PromoSlide[] = [
   },
 ];
 
+/** Props for {@link PromotionalCarousel}. */
 interface PromotionalCarouselProps {
-  /** Optional custom navigation override if needed; defaults to navigate('/category/:id') */
+  /**
+   * Overrides the default `navigate('/category/:id')` behaviour. Useful when a
+   * host page wants to intercept the transition (for example to run an exit
+   * animation first).
+   */
   onNavigateCollection?: (collectionId: string) => void;
-  /** Template style selector - allows switching between Template 1, Template 2, etc. */
-  templateStyle?: 'template1' | 'template2';
 }
 
 /**
- * PromotionalCarousel encapsulates slide data AND navigation handling internally.
+ * PromotionalCarousel owns the campaign slide data and the CTA's navigation, so
+ * host pages can drop it in with no props.
+ *
+ * The presentation lives in {@link PromotionalCarouselTemplate1}. When a second
+ * layout is needed, add a `templateStyle` prop here and branch on it — see
+ * `docs/promoCarousal.md` for the template concepts. Keeping the data in this
+ * wrapper means a new template only has to implement the visuals.
  */
-export const PromotionalCarousel: React.FC<PromotionalCarouselProps> = ({ 
+export const PromotionalCarousel: React.FC<PromotionalCarouselProps> = ({
   onNavigateCollection,
-  templateStyle = 'template1'
 }) => {
   const navigate = useNavigate();
 
-  // Handle navigation internally unless an external handler is explicitly passed
   const handleNavigation = (collectionId: string) => {
     if (onNavigateCollection) {
       onNavigateCollection(collectionId);
-    } else {
-      navigate(`/category/${collectionId}`);
+      return;
     }
+    navigate(`/category/${collectionId}`);
   };
 
-  switch (templateStyle) {
-    case 'template1':
-    default:
-      return (
-        <PromotionalCarouselTemplate1
-          slides={PROMO_SLIDES_DATA}
-          onNavigateCollection={handleNavigation}
-          autoSlideInterval={7000}
-        />
-      );
-  }
+  return (
+    <PromotionalCarouselTemplate1
+      slides={PROMO_SLIDES_DATA}
+      onNavigateCollection={handleNavigation}
+      autoSlideInterval={7000}
+    />
+  );
 };
-
-/* Future template expansion example:
-    case 'template2':
-      return (
-        <PromotionalCarouselTemplate2
-          slides={PROMO_SLIDES_DATA}
-          onNavigateCollection={onNavigateCollection}
-        />
-      );
-    */

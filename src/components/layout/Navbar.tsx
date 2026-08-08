@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Compass, PhoneCall, Home, LayoutGrid, Moon, Sun, Menu, X } from 'lucide-react';
+import { Compass, PhoneCall, Home, BookOpen, Moon, Sun, Menu, X } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useTheme } from '../../context';
@@ -21,7 +21,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Home', icon: Home },
   { to: '/collections', label: 'Collections', icon: Compass },
-  { to: '/catalog', label: 'Catalog', icon: LayoutGrid },
+  { to: '/about', label: 'Our Story', icon: BookOpen },
   { to: '/contact', label: 'Contact', icon: PhoneCall },
 ];
 
