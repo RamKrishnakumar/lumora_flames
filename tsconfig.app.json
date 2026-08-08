@@ -17,6 +17,11 @@
     "jsx": "react-jsx",
 
     /* Linting */
+    /* `strict` is required, not just preferred: without `strictNullChecks`,
+       TypeScript cannot discriminate a union on a boolean literal, so
+       `if (result.ok)` narrows nothing and the `ok: false` arm's fields are
+       reported as missing. See `VerificationResult` in src/lib/verification.ts. */
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,

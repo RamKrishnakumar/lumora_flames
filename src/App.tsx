@@ -1,169 +1,177 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useParams,
+  Navigate,
+} from 'react-router-dom';
 
-// Design Token Imports
+import { ThemeProvider } from './context';
 import { DESIGN_TOKENS } from './theme/designSystem';
-
-// Data Source
 import { CANDLE_CATEGORIES } from './data/categories';
 
-// Feature Components
-import { PromotionalCarousel } from './features/landing/PromotionalCarousel';
-import { CollectionsStoryView } from './features/categories/CollectionsStoryView';
-import { ScrollInteractiveShowcase } from './features/landing/ScrollInteractiveShowcase';
-import { ContactFormWorkflow } from './features/contact/ContactFormWorkflow';
+import { Navbar } from './components/layout/Navbar';
+import { Footer } from './components/layout/Footer';
+import { PageTransition } from './components/layout/PageTransition';
+import { ErrorBoundary } from './components/layout/ErrorBoundary';
+import { AmbientFlameGlow } from './components/ui/AmbientFlameGlow';
+import { RouteFallback } from './components/ui/RouteFallback';
 
-// UI Layout Components
-import { Compass, PhoneCall, Home, Moon, Sun } from 'lucide-react';
+/*
+ * Route components are lazy so each page ships as its own chunk. This matters
+ * more here than in a typical app: the collection photography is imported by the
+ * data module, so an eagerly-imported route drags several megabytes of PNG into
+ * the initial bundle.
+ *
+ * Named exports are re-mapped to `default` because `lazy` requires a module with
+ * a default export, and the house convention is named exports only.
+ */
+const LandingHero = lazy(() =>
+  import('./features/landing/LandingHero').then((m) => ({ default: m.LandingHero }))
+);
+const CollectionsStoryView = lazy(() =>
+  import('./features/categories/CollectionsStoryView').then((m) => ({
+    default: m.CollectionsStoryView,
+  }))
+);
+const SubCategoryShowcase = lazy(() =>
+  import('./features/categories/SubCategoryShowcase').then((m) => ({
+    default: m.SubCategoryShowcase,
+  }))
+);
+const AboutStory = lazy(() =>
+  import('./features/about/AboutStory').then((m) => ({ default: m.AboutStory }))
+);
+const ContactFormWorkflow = lazy(() =>
+  import('./features/contact/ContactFormWorkflow').then((m) => ({
+    default: m.ContactFormWorkflow,
+  }))
+);
+
+/** Standard page shell: max width, gutters, and clearance for the fixed navbar. */
+const PageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <main className="min-h-screen">
+    <div
+      className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX} ${DESIGN_TOKENS.layout.headerOffset}`}
+    >
+      {children}
+    </div>
+  </main>
+);
 
 /* ==========================================================================
-   1. NAVIGATION HEADER (Global Luxury Glass Navbar)
+   1. HOME (/)
    ========================================================================== */
-const Navbar: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDark, toggleTheme }) => {
+const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 py-4 px-6 sm:px-12 transition-all duration-300">
-      <nav className={`max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5 rounded-full ${DESIGN_TOKENS.glass.floatingBtn}`}>
-        <button 
-          onClick={() => navigate('/')} 
-          className="text-lg font-light tracking-[0.2em] uppercase text-stone-900 dark:text-stone-100 flex items-center gap-2 group"
-        >
-          <span className="font-semibold text-amber-500">LUMORA</span>
-          <span className="font-extralight text-stone-500 dark:text-stone-400 group-hover:text-amber-400 transition-colors">FLAMES</span>
-        </button>
-
-        <div className="flex items-center gap-6 text-xs uppercase tracking-widest font-medium text-stone-700 dark:text-stone-300">
-          <button onClick={() => navigate('/')} className="hover:text-amber-500 transition-colors flex items-center gap-1.5">
-            <Home className="w-3.5 h-3.5" /> Home
-          </button>
-          <button onClick={() => navigate('/collections')} className="hover:text-amber-500 transition-colors flex items-center gap-1.5">
-            <Compass className="w-3.5 h-3.5" /> Collections
-          </button>
-          <button onClick={() => navigate('/contact')} className="hover:text-amber-500 transition-colors flex items-center gap-1.5">
-            <PhoneCall className="w-3.5 h-3.5" /> Contact
-          </button>
-        </div>
-
-        <button
-          onClick={toggleTheme}
-          aria-label="Toggle Theme"
-          className="p-2 rounded-full hover:bg-stone-200/50 dark:hover:bg-stone-800/50 text-stone-800 dark:text-stone-200 transition-colors"
-        >
-          {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-stone-700" />}
-        </button>
-      </nav>
-    </header>
+    <PageShell>
+      <LandingHero onSelectCategory={(id) => navigate(`/category/${id}`)} />
+    </PageShell>
   );
 };
 
 /* ==========================================================================
-   2. HOME PAGE WRAPPER
+   2. COLLECTIONS STORY (/collections)
+   Full-bleed and self-pinning, so it opts out of PageShell's gutters.
    ========================================================================== */
-const HomePage: React.FC = () => {
-  //const navigate = useNavigate();
+const CollectionsPage: React.FC = () => {
+  const navigate = useNavigate();
 
   return (
-    <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} space-y-24 pb-20`}>
-
-      {[...Array(3)].map((_, index) => (
-        <section key={index} className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX}`}>
-          <PromotionalCarousel />
-        </section>
-      ))}
-      {/* <section className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX}`}>
-        <PromotionalCarousel />
-      </section>
-
-      <section className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX}`}>
-        <PromotionalCarousel />
-      </section>
-
-      <section className={`${DESIGN_TOKENS.layout.maxWidth} mx-auto ${DESIGN_TOKENS.layout.paddingX}`}>
-        <PromotionalCarousel />
-      </section> */}
-
-      {/* <section className="w-full">
-        <div className="text-center mb-12 space-y-2">
-          <span className={DESIGN_TOKENS.typography.eyebrow}>Curated Masterpieces</span>
-          <h2 className={DESIGN_TOKENS.typography.sectionTitle}>Explore The Collections</h2>
-        </div>
-        
-        <CollectionsStoryView 
-          onOpenSubCategory={(categoryId) => navigate(`/category/${categoryId}`)} 
-        />
-      </section> */}
+    <main className="min-h-screen">
+      <CollectionsStoryView onOpenSubCategory={(id) => navigate(`/category/${id}`)} />
     </main>
   );
 };
 
 /* ==========================================================================
-   3. SUBCATEGORY EXPERIENCE WRAPPER (/category/:categoryId)
+   3. SUBCATEGORY EXPERIENCE (/category/:categoryId)
    ========================================================================== */
 const SubCategoryPage: React.FC = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
 
-  // Selected category is passed dynamically to the subcategory viewer
-  const selectedCategory = CANDLE_CATEGORIES.find((c) => c.id === categoryId) || CANDLE_CATEGORIES[0];
+  const category = CANDLE_CATEGORIES.find((c) => c.id === categoryId);
+
+  // Unknown slug: send to the collections story rather than silently showing #1.
+  if (!category) return <Navigate to="/collections" replace />;
 
   return (
-    <main className="min-h-screen pt-20">
-      <ScrollInteractiveShowcase 
-        selectedCategory={selectedCategory}
-        onSelectCategory={(id) => navigate(`/category/${id}`)} 
+    <main className="min-h-screen">
+      <SubCategoryShowcase
+        category={category}
+        onBack={() => navigate('/collections')}
+        onOrderCustom={(subject) => navigate('/contact', { state: { categoryTitle: subject } })}
       />
     </main>
   );
 };
 
 /* ==========================================================================
-   4. CONTACT & OTP VERIFICATION PAGE
+   4. BRAND STORY (/about)
    ========================================================================== */
-const ContactPage: React.FC = () => {
-  return (
-    <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} py-12 px-4`}>
-      <ContactFormWorkflow />
-    </main>
-  );
-};
+const AboutPage: React.FC = () => (
+  <PageShell>
+    <AboutStory />
+  </PageShell>
+);
 
 /* ==========================================================================
-   5. MASTER APP COMPONENT
+   5. CONTACT & OTP VERIFICATION (/contact)
+   ========================================================================== */
+const ContactPage: React.FC = () => (
+  <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} px-4 pb-24`}>
+    <ContactFormWorkflow />
+  </main>
+);
+
+/* ==========================================================================
+   6. MASTER APP
    ========================================================================== */
 export default function App() {
-  const [isDark, setIsDark] = useState(true);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (!isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
-
   return (
-    <div className={`w-full min-h-screen transition-colors duration-500 ${isDark ? 'dark bg-stone-950 text-stone-100' : 'bg-stone-50 text-stone-900'}`}>
-      <Router>
-        <Navbar isDark={isDark} toggleTheme={toggleTheme} />
-        
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route 
-            path="/collections" 
-            element={
-              <main className="pt-20">
-                <CollectionsStoryView 
-                  onOpenSubCategory={(id) => window.location.href = `/category/${id}`} 
-                />
-              </main>
-            } 
-          />
-          <Route path="/category/:categoryId" element={<SubCategoryPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-        </Routes>
-      </Router>
-    </div>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <Router>
+          <div className="relative min-h-screen w-full bg-stone-50 text-stone-900 transition-colors duration-500 dark:bg-stone-950 dark:text-stone-100">
+            <AmbientFlameGlow />
+
+            <div className="relative z-10">
+              <Navbar />
+
+              <PageTransition>
+                <Suspense fallback={<RouteFallback />}>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/collections" element={<CollectionsPage />} />
+                    <Route path="/category/:categoryId" element={<SubCategoryPage />} />
+                    {/*
+                      Retired routes. `/catalog` was a searchable card grid that
+                      duplicated the home page's layout, and `/category/:id/details`
+                      listed the same varieties the subcategory experience now
+                      walks through. Both redirect so existing links keep working.
+                    */}
+                    <Route path="/catalog" element={<Navigate to="/collections" replace />} />
+                    <Route
+                      path="/category/:categoryId/details"
+                      element={<Navigate to="/collections" replace />}
+                    />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
+              </PageTransition>
+
+              <Footer />
+            </div>
+          </div>
+        </Router>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
