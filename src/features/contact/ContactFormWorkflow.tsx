@@ -43,7 +43,7 @@ export const ContactFormWorkflow: React.FC = () => {
 
       setStep('SUCCESS');
     } catch (err) {
-      setErrorMsg(err.message || 'Verification failed.');
+      setErrorMsg(err instanceof Error ? err.message : 'Verification failed.');
     } finally {
       setIsVerifying(false);
     }

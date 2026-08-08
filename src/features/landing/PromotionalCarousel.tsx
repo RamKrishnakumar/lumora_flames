@@ -1,10 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ASSET_IMAGES } from '../../data/assets';
-import { 
-  PromotionalCarouselTemplate1,  
-} from '../landing/promoCarousalTemplate1';
-import type { PromoSlide } from '../landing/promoCarousalTemplate1';
+import { PromotionalCarouselTemplate1 } from './PromoCarouselTemplate1';
+import type { PromoSlide } from './PromoCarouselTemplate1';
 
 /**
  * Master Promotional Slide Data Array
