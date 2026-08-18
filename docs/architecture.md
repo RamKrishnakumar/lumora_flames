@@ -26,7 +26,7 @@ src/
 │   ├── layout/             # Navbar, Footer, PageTransition, ErrorBoundary
 │   ├── ui/                 # CollectionShowcase, AmbientFlameGlow, EmberField,
 │   │                       # RouteFallback
-│   └── canvas/InteractiveCandleCanvas.tsx
+│   └── canvas/             # InteractiveCandleCanvas, CandleFlame
 ├── features/               # Route-level compositions
 │   ├── landing/            # LandingHero, HeroChamber, CollectionIndexRail,
 │   │                       # CampaignShowcase, PromotionalCarousel,
