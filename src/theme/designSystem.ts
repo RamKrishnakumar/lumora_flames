@@ -50,8 +50,30 @@ export const DESIGN_TOKENS = {
      * Amber light pool cast from low-centre — the hero's "this room is lit"
      * layer. A gradient rather than a blurred circle, so the falloff is smooth
      * at any viewport size.
+     *
+     * `circle` and not the shorthand `60% 50%` ellipse it used to be. An ellipse
+     * that wide and flat has its transparent stop meet the container's bottom
+     * edge along a near-horizontal line, and with the sides fading at a different
+     * rate the whole thing reads as a soft-cornered *box* rather than light
+     * radiating outward. A circle sized in `vmax` falls off at the same rate in
+     * every direction, which is what light actually does.
+     *
+     * Centred on its own element (`50% 50%`) and sized `closest-side`, which is
+     * the part that keeps it from reading as a rectangle. A background is clipped
+     * to its element's box, so any origin *other* than the centre leaves the four
+     * edges at four different distances from it — and wherever the nearest edge is
+     * crossed while the gradient still carries alpha, that edge becomes a visible
+     * straight line. Origin at the centre plus `closest-side` makes every edge
+     * equidistant, and the stops below reach full transparency at 86% of that
+     * radius, so the falloff finishes *inside* the box in every direction and
+     * there is no edge left to see. It also means the element can be scaled
+     * freely: box and gradient scale together, so the margin is preserved.
+     *
+     * The caller owes this one thing: a **square** element **centred on the
+     * wick**, large enough to hold the falloff. `HeroChamber`'s pool wrapper is
+     * where that happens, and why it is sized in `vmax` rather than `inset-0`.
      */
     scrimRadial:
-      'bg-[radial-gradient(60%_50%_at_50%_85%,rgba(245,158,11,0.28),rgba(245,158,11,0.08)_45%,transparent_72%)]',
+      'bg-[radial-gradient(circle_closest-side_at_50%_50%,rgba(245,158,11,0.30),rgba(245,158,11,0.13)_28%,rgba(245,158,11,0.04)_53%,transparent_86%)]',
   },
 } as const;
