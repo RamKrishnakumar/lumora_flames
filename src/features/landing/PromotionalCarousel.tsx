@@ -1,54 +1,28 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ASSET_IMAGES } from '../../data/assets';
+import { GIFTING_SLIDES, OFFER_SLIDES, REASON_SLIDES } from '../../data/promotions';
 import { PromotionalCarouselTemplate1 } from './PromoCarouselTemplate1';
-import type { PromoSlide } from './PromoCarouselTemplate1';
+import { PromoCarouselTemplate2 } from './PromoCarouselTemplate2';
+import { PromoCarouselTemplate3 } from './PromoCarouselTemplate3';
 
 /**
- * The live promotional placements, in display order.
+ * Which promotional placement to render.
  *
- * Each `targetCollectionId` must match an id in `CANDLE_CATEGORIES` — the CTA
- * routes to `/category/:id`, so a typo lands the visitor on a redirect instead of
- * the collection. Images come from `ASSET_IMAGES` rather than string paths, which
- * would 404 in a production build.
+ * Each maps to one dataset in `data/promotions.ts` and one template, and each
+ * template is a genuinely different format — a photographic slideshow, a
+ * typographic band, and a drifting ribbon. Three carousels in a row that all
+ * looked alike would read as a page that couldn't decide what to say.
+ *
+ * - `offers` — full-bleed photography, autoplaying. Reasons to act now.
+ * - `reasons` — oversized type, scroll-driven, no imagery. Why own a candle.
+ * - `gifting` — drifting ribbon of occasion cards. Several options at once.
  */
-const PROMO_SLIDES_DATA: PromoSlide[] = [
-  {
-    id: 'diwali-launch',
-    tagline: 'Exclusive Festive Release',
-    title: 'Illuminating Sacred',
-    highlightText: 'Celebrations',
-    description:
-      'Handcrafted brass urlis and botanical-infused floral diyas created for memorable evenings.',
-    bgImage: ASSET_IMAGES.promotional_one.first,
-    ctaText: 'Explore Festive Urli Collection',
-    targetCollectionId: 'festive-urlis',
-  },
-  {
-    id: 'sculptural-mimic',
-    tagline: 'Artisanal Sculpture Series',
-    title: 'Gourmet Desserts &',
-    highlightText: 'Smoothie Wax Art',
-    description:
-      'Playful yet sophisticated designs mimicking fine delicacies and refreshing smoothies.',
-    bgImage: ASSET_IMAGES.promotional_one.second,
-    ctaText: 'Discover Sculptural Art',
-    targetCollectionId: 'sculptural-food',
-  },
-  {
-    id: 'bespoke-fragrance',
-    tagline: 'Personalized Concierge',
-    title: 'Bespoke Blends &',
-    highlightText: 'Custom Labels',
-    description: 'Custom scents poured into frosted jars with photo-embedded wax keepsakes.',
-    bgImage: ASSET_IMAGES.promotional_one.third,
-    ctaText: 'Design Custom Blend',
-    targetCollectionId: 'bespoke-personalized',
-  },
-];
+export type PromoPlacement = 'offers' | 'reasons' | 'gifting';
 
 /** Props for {@link PromotionalCarousel}. */
-interface PromotionalCarouselProps {
+export interface PromotionalCarouselProps {
+  /** Which placement to render. See {@link PromoPlacement}. */
+  placement: PromoPlacement;
   /**
    * Overrides the default `navigate('/category/:id')` behaviour. Useful when a
    * host page wants to intercept the transition (for example to run an exit
@@ -58,15 +32,20 @@ interface PromotionalCarouselProps {
 }
 
 /**
- * PromotionalCarousel owns the campaign slide data and the CTA's navigation, so
- * host pages can drop it in with no props.
+ * PromotionalCarousel is the smart container for all three promotional
+ * placements: it owns the routing and selects the dataset and template for the
+ * requested {@link PromoPlacement}, so a host page just names the placement.
  *
- * The presentation lives in {@link PromotionalCarouselTemplate1}. When a second
- * layout is needed, add a `templateStyle` prop here and branch on it — see
- * `docs/promoCarousal.md` for the template concepts. Keeping the data in this
- * wrapper means a new template only has to implement the visuals.
+ * The data-in / template-out split is deliberate and load-bearing — templates
+ * receive a slide array and a navigation callback, and know nothing about routing
+ * or where content comes from. Adding a fourth placement means adding a dataset,
+ * a template, and one `case` here. Never fork this container, and never hardcode
+ * slide data inside a template.
+ *
+ * See `docs/promoCarousal.md` for the template concept library.
  */
 export const PromotionalCarousel: React.FC<PromotionalCarouselProps> = ({
+  placement,
   onNavigateCollection,
 }) => {
   const navigate = useNavigate();
@@ -79,11 +58,33 @@ export const PromotionalCarousel: React.FC<PromotionalCarouselProps> = ({
     navigate(`/category/${collectionId}`);
   };
 
-  return (
-    <PromotionalCarouselTemplate1
-      slides={PROMO_SLIDES_DATA}
-      onNavigateCollection={handleNavigation}
-      autoSlideInterval={7000}
-    />
-  );
+  switch (placement) {
+    case 'reasons':
+      return (
+        <PromoCarouselTemplate2
+          slides={REASON_SLIDES}
+          onNavigateCollection={handleNavigation}
+          label="Why choose a candle"
+        />
+      );
+
+    case 'gifting':
+      return (
+        <PromoCarouselTemplate3
+          slides={GIFTING_SLIDES}
+          onNavigateCollection={handleNavigation}
+          label="Gifting occasions"
+        />
+      );
+
+    case 'offers':
+      return (
+        <PromotionalCarouselTemplate1
+          slides={OFFER_SLIDES}
+          onNavigateCollection={handleNavigation}
+          autoSlideInterval={7000}
+          label="Current offers and seasonal releases"
+        />
+      );
+  }
 };

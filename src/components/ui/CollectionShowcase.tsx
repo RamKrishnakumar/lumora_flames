@@ -232,16 +232,30 @@ export const CollectionShowcase: React.FC<CollectionShowcaseProps> = ({
             <div className="absolute inset-x-0 bottom-0 p-7 sm:p-12 lg:p-16">{copy}</div>
           </div>
         ) : variant === 'offsetFrame' ? (
-          /* Copy overlaps the frame's inner corner, so the two blocks interlock
-             instead of sitting in tidy adjacent columns. */
-          <div
-            className={cn(
-              'grid items-center gap-8 lg:grid-cols-12 lg:gap-0',
-              flipped && 'lg:[direction:rtl] lg:*:[direction:ltr]'
-            )}
-          >
-            <div className="lg:col-span-7">{frame}</div>
-            <div className="lg:col-span-5 lg:-ml-16 lg:rounded-[2rem] lg:p-10 lg:backdrop-blur-xl lg:bg-white/60 lg:dark:bg-stone-950/50 lg:border lg:border-stone-200/70 lg:dark:border-stone-800/70 lg:shadow-2xl">
+          /*
+           * Copy overlaps the frame's inner corner, so the two blocks interlock
+           * instead of sitting in tidy adjacent columns.
+           *
+           * Flipped with `order`, not the `direction: rtl` trick the other
+           * variants use. That trick reverses visual order but leaves the
+           * physical `-ml-16` pointing at the page gutter once the panel is on
+           * the left — a 4rem pull against a 4rem `lg:px-16` gutter, so the panel
+           * sat flush to the viewport with no padding at all. A logical `-ms-16`
+           * is no help: the children restore `direction: ltr`, and logical
+           * margins resolve against the element's own direction.
+           *
+           * `order` also reorders painting, so the panel can no longer rely on
+           * coming later in the DOM to sit above the frame — hence `z-10`.
+           */
+          <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-0">
+            <div className={cn('lg:col-span-7', flipped && 'lg:order-2')}>{frame}</div>
+            <div
+              className={cn(
+                'lg:relative lg:z-10 lg:col-span-5 lg:rounded-[2rem] lg:p-10 lg:backdrop-blur-xl lg:bg-white/60 lg:dark:bg-stone-950/50 lg:border lg:border-stone-200/70 lg:dark:border-stone-800/70 lg:shadow-2xl',
+                // Always pulls toward the frame, never toward the gutter.
+                flipped ? 'lg:order-1 lg:-mr-16' : 'lg:-ml-16'
+              )}
+            >
               {copy}
             </div>
           </div>

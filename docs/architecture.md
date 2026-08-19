@@ -14,18 +14,23 @@ src/
 ├── main.tsx                # createRoot entry
 ├── index.css               # Tailwind import, @theme, dark variant, base layer
 ├── theme/designSystem.ts   # DESIGN_TOKENS — shared class strings
-├── types/category.ts       # Category / SubCategory domain model
+├── types/
+│   ├── category.ts         # Category / SubCategory domain model
+│   └── promotion.ts        # PromoSlide / ReasonSlide / GiftingSlide
 ├── data/
 │   ├── categories.ts       # CANDLE_CATEGORIES — the single content source
+│   ├── promotions.ts       # OFFER / REASON / GIFTING slides + DEV id assertion
 │   ├── assets.ts           # ASSET_IMAGES — imported (hashed) image registry
 │   └── images/             # Source photography
 ├── components/             # Reusable, presentational
 │   ├── layout/             # Navbar, Footer, PageTransition, ErrorBoundary
-│   ├── ui/                 # CollectionShowcase, AmbientFlameGlow, RouteFallback
-│   └── canvas/InteractiveCandleCanvas.tsx
+│   ├── ui/                 # CollectionShowcase, AmbientFlameGlow, EmberField,
+│   │                       # RouteFallback
+│   └── canvas/             # InteractiveCandleCanvas, CandleFlame
 ├── features/               # Route-level compositions
-│   ├── landing/            # LandingHero, CampaignShowcase,
-│   │                       # PromotionalCarousel, PromoCarouselTemplate1
+│   ├── landing/            # LandingHero, HeroChamber, CollectionIndexRail,
+│   │                       # CampaignShowcase, PromotionalCarousel,
+│   │                       # PromoCarouselTemplate1/2/3
 │   ├── categories/         # CollectionsStoryView, SubCategoryShowcase
 │   ├── about/AboutStory.tsx
 │   └── contact/ContactFormWorkflow.tsx
@@ -45,7 +50,7 @@ All defined in [`App.tsx`](../src/App.tsx). Every page component is `React.lazy`
 
 | Path | Component | Notes |
 | --- | --- | --- |
-| `/` | `LandingHero` | Opening statement + promo carousel + six `CollectionShowcase` blocks + `CampaignShowcase` |
+| `/` | `LandingHero` | Seven screens — see [Home page composition](#home-page-composition) |
 | `/collections` | `CollectionsStoryView` | Scroll-pinned, one full viewport per collection, a different GSAP treatment each |
 | `/category/:categoryId` | `SubCategoryShowcase` | Pinned scroll-through of one collection's varieties, driving `InteractiveCandleCanvas` |
 | `/about` | `AboutStory` | Brand story, scrubbed process timeline, pillars |
@@ -57,6 +62,31 @@ Retired paths still resolve so old links don't 404: `/catalog` and `/category/:c
 The router tree is `ErrorBoundary > ThemeProvider > Router`, with `PageTransition` wrapping the `Suspense` boundary (fallback: `RouteFallback`) and `Footer` rendered once below it. `PageTransition` resets scroll, plays the enter tween, and calls `ScrollTrigger.refresh()` on completion — pinned routes measure wrong without it.
 
 **Flow:** Landing → Collections → Sub Categories → Contact/Inquiry. Individual product pages are a future step; `SubCategoryShowcase` is currently the leaf.
+
+`PageShell` (max width, gutters, `headerOffset`) wraps `/about` and is applied loosely on `/contact`. `/` and `/collections` **opt out** — both are full-bleed and self-pinning, and a page-level wrapper would cage a `100svh` hero. They apply containment per section instead.
+
+## Home page composition
+
+[`LandingHero`](../src/features/landing/LandingHero.tsx) is composition only — seven screens, each owning its own motion and its own reduced-motion branch.
+
+| # | Screen | Component | Format | Images |
+| --- | --- | --- | --- | --- |
+| 1 | Hero | `HeroChamber` | Centred display type in a lit chamber | 0 |
+| 2 | Offers | `PromotionalCarousel placement="offers"` | Photographic slideshow, autoplay | 3 |
+| 3 | Featured | 3 × `CollectionShowcase` | Editorial spreads, a different variant each | 3 |
+| 4 | Why candles | `PromotionalCarousel placement="reasons"` | Pinned typographic band | 0 |
+| 5 | Gifting | `PromotionalCarousel placement="gifting"` | Drifting ribbon, drag-to-scrub | 4 |
+| 6 | All six | `CollectionIndexRail` | Type-led index, one swapping `<img>` | 6 |
+| 7 | Campaigns | `CampaignShowcase` | Uneven 12-column mosaic | 0 |
+
+Two rules hold this together, and both are easy to break by adding "one more section":
+
+- **No two consecutive screens resolve the same way.** Image-led and type-led alternate. Screens 1, 4 and 7 ship zero image bytes, which is what let the page grow from four sections to seven without getting heavier.
+- **Home teases; `/collections` delivers.** Screen 3 features exactly three collections, named in `FEATURED_COLLECTION_IDS` and resolved against `CANDLE_CATEGORIES` (unknown ids are skipped, not rendered empty). Screen 6 indexes all six as type rows and links onward. Home previously mapped all six through `CollectionShowcase` — the same six, in the same order, that `/collections` already tells as pinned viewports. Don't reintroduce that.
+
+`HeroChamber` layers a chamber gradient, a breathing radial light pool, `EmberField` (14 seeded rising sparks), and `InteractiveCandleCanvas` cropped by the bottom edge. Its hero visual is *looked up* from `CANDLE_CATEGORIES` rather than hardcoded, so the signature product stays in sync with the data.
+
+`Draggable` and `InertiaPlugin` (used by Template3) ship free with GSAP as of 3.13, but together are ~117 KB of source. They are **dynamically imported** — statically importing them put all of it on the landing page's critical path for a drag affordance on the fifth screen, taking the landing chunk from 22 KB to 88 KB. The drift, hover-pause, and click-through all work without them.
 
 ## Inquiry verification
 
@@ -70,7 +100,11 @@ The router tree is `ErrorBoundary > ThemeProvider > Router`, with `PageTransitio
 
 Everything renders from `CANDLE_CATEGORIES` in [`data/categories.ts`](../src/data/categories.ts), typed by `Category`/`SubCategory` in [`types/category.ts`](../src/types/category.ts). There is no backend and no API layer. To add a collection, append to that array — every route picks it up automatically.
 
-`CANDLE_CATEGORIES` is the source of truth: **do not rename ids and do not change the hierarchy.** Ids are slugs used directly in URLs and referenced by `PromoSlide.targetCollectionId`; renaming one breaks live links and dead-ends the CTA at a redirect.
+`CANDLE_CATEGORIES` is the source of truth: **do not rename ids and do not change the hierarchy.** Ids are slugs used directly in URLs and referenced by every promotional slide's `targetCollectionId`; renaming one breaks live links and dead-ends the CTA at a redirect.
+
+[`data/promotions.ts`](../src/data/promotions.ts) is the second content module, holding the three promotional datasets. It validates every `targetCollectionId` against `CANDLE_CATEGORIES` on import and throws in development, behind `import.meta.env.DEV`. This is a hard requirement rather than a nicety: an unknown slug redirects to `/collections`, so a broken CTA still *navigates* and still looks like it worked. Two of the original three slides were wrong for exactly this reason. Add a new dataset to that assertion's list or its ids go unchecked.
+
+Cross-cutting groupings like *gifting* live in `promotions.ts` and **map onto** existing category ids (weddings → `bespoke-personalized`, corporate → `container-jar`). They must not become `CANDLE_CATEGORIES` entries.
 
 Each `SubCategory` carries an optional `visual: CandleVisual` (`vessel`, `waxFrom`, `waxTo`, `labelNote`) that drives `InteractiveCandleCanvas`. The wax tones are neutrals — glass, cream, wax — so the amber-only accent rule still holds.
 

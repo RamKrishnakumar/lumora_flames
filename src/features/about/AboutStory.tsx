@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { Flame, MapPin } from 'lucide-react';
+import { Flame, Sparkles, MessageCircle, Camera, PhoneCall, ArrowUpRight } from 'lucide-react';
 import { ASSET_IMAGES } from '../../data/assets';
+import { INSTAGRAM, whatsappLink } from '../../data/contact';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { cn } from '../../lib/utils';
 import { DESIGN_TOKENS } from '../../theme/designSystem';
@@ -69,7 +70,14 @@ const PILLARS: Pillar[] = [
 
 /**
  * AboutStory is the brand narrative page: an opening statement, the studio
- * portrait, the four-stage craft timeline, vision pillars, and a location note.
+ * portrait, the four-stage craft timeline, vision pillars, and the enquiry panel
+ * that closes it.
+ *
+ * The panel used to invite readers to visit and smell the candles, which
+ * promised a shopfront that does not exist — there is no studio open to walk
+ * into. It now offers the three channels that do exist, ordered by how little
+ * they ask of the reader: WhatsApp, Instagram, then the concierge form. Handles
+ * and numbers live in `data/contact.ts`, not here.
  *
  * The timeline's connecting rule is scroll-scrubbed via `scaleY`, so it appears
  * to draw itself downward as the reader descends — the page's signature moment.
@@ -274,33 +282,91 @@ export const AboutStory: React.FC = () => {
         </div>
       </section>
 
-      {/* Studio location + CTA */}
-      <section className={cn('rounded-[2.5rem] p-9 sm:p-14', DESIGN_TOKENS.glass.card)}>
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+      {/* Enquiry panel */}
+      <section aria-labelledby="enquiry-heading" className={cn('rounded-[2.5rem] p-9 sm:p-14', DESIGN_TOKENS.glass.card)}>
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           <div className="max-w-xl space-y-4">
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
-              <MapPin className="h-3.5 w-3.5" /> Visit the studio
+              <Sparkles className="h-3.5 w-3.5" /> Made to order
             </span>
-            <h2 className={cn(DESIGN_TOKENS.typography.sectionTitle, 'text-stone-900 dark:text-stone-100')}>
-              Come and smell them yourself
+            <h2
+              id="enquiry-heading"
+              className={cn(DESIGN_TOKENS.typography.sectionTitle, 'text-stone-900 dark:text-stone-100')}
+            >
+              Tell us what you want made
             </h2>
             <p className={cn(DESIGN_TOKENS.typography.body, 'text-stone-600 dark:text-stone-400')}>
-              Studio visits are by appointment, so there is time to talk through blends properly.
-              Tell us roughly when suits and we&apos;ll find a slot.
+              Nothing here is sitting on a shelf — every piece is poured after you ask for it, which
+              means the vessel, the scent and the size are all still open. Message us with the
+              occasion and roughly how many you need, and we&apos;ll come back with what is possible.
+            </p>
+            <p className={cn(DESIGN_TOKENS.typography.body, 'text-stone-500 dark:text-stone-500')}>
+              WhatsApp is quickest. {INSTAGRAM.handle} is where the work in progress goes, so it is
+              the best place to see what a blend actually looks like poured.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate('/contact')}
-            className={cn(
-              'shrink-0 rounded-full bg-amber-500 px-8 py-4 text-stone-950 shadow-lg transition-colors hover:bg-amber-400',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-4 focus-visible:ring-offset-stone-50 dark:focus-visible:ring-offset-stone-950',
-              DESIGN_TOKENS.typography.button
-            )}
-          >
-            Request an appointment
-          </button>
+          {/*
+            Three ways to start, ranked. WhatsApp first because a message costs a
+            reader nothing and lands with us instantly; the form last because it
+            is the highest-effort option, and offering it first has been enough
+            to lose the enquiry. It stays because some people would rather be
+            called back than start a chat.
+
+            The two direct channels are `<a>`, not buttons with handlers: they
+            leave the site, so they need middle-click, long-press and "copy link"
+            to behave — which only a real anchor gives.
+          */}
+          <div className="flex w-full shrink-0 flex-col gap-3 lg:w-auto lg:min-w-[19rem]">
+            <a
+              href={whatsappLink()}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(
+                'inline-flex items-center justify-between gap-4 rounded-full bg-amber-500 px-7 py-4 text-stone-950 shadow-lg transition-colors hover:bg-amber-400',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-4 focus-visible:ring-offset-stone-50 dark:focus-visible:ring-offset-stone-950',
+                DESIGN_TOKENS.typography.button
+              )}
+            >
+              <span className="inline-flex items-center gap-2.5">
+                <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                Message on WhatsApp
+              </span>
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+
+            <a
+              href={INSTAGRAM.url}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(
+                'inline-flex items-center justify-between gap-4 rounded-full border border-stone-300 px-7 py-4 text-stone-800 transition-colors hover:border-amber-500 hover:text-amber-600',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-4 focus-visible:ring-offset-stone-50',
+                'dark:border-stone-700 dark:text-stone-200 dark:hover:border-amber-400 dark:hover:text-amber-400 dark:focus-visible:ring-offset-stone-950',
+                DESIGN_TOKENS.typography.button
+              )}
+            >
+              <span className="inline-flex items-center gap-2.5">
+                <Camera className="h-4 w-4" aria-hidden="true" />
+                See the work on Instagram
+              </span>
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+
+            <button
+              type="button"
+              onClick={() => navigate('/contact')}
+              className={cn(
+                'inline-flex items-center gap-2.5 rounded-full px-7 py-4 text-stone-600 transition-colors hover:text-amber-600',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-4 focus-visible:ring-offset-stone-50',
+                'dark:text-stone-400 dark:hover:text-amber-400 dark:focus-visible:ring-offset-stone-950',
+                DESIGN_TOKENS.typography.button
+              )}
+            >
+              <PhoneCall className="h-4 w-4" aria-hidden="true" />
+              Or have us contact you
+            </button>
+          </div>
         </div>
       </section>
     </div>

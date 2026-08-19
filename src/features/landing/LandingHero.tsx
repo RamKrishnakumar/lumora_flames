@@ -1,138 +1,148 @@
 import React, { useRef } from 'react';
-import { Flame } from 'lucide-react';
-import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
 import { CANDLE_CATEGORIES } from '../../data/categories';
 import { CollectionShowcase, type ShowcaseVariant } from '../../components/ui/CollectionShowcase';
+import { HeroChamber } from './HeroChamber';
 import { PromotionalCarousel } from './PromotionalCarousel';
+import { CollectionIndexRail } from './CollectionIndexRail';
 import { CampaignShowcase } from './CampaignShowcase';
-import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { cn } from '../../lib/utils';
 import { DESIGN_TOKENS } from '../../theme/designSystem';
-import { EASE, DURATION, settleInstantly } from '../../lib/animations';
 
 /**
- * Layout treatment assigned to each collection showcase, by position.
+ * Collections given a full editorial spread on the home page.
  *
- * Deliberately non-repeating across the first four so no two consecutive blocks
- * scroll alike; the sequence then cycles. Combined with the alternating `flipped`
- * flag below, each of the six collections gets a distinct spread.
+ * Only three, deliberately. The home page previously rendered all six — the same
+ * six, in the same order, that `/collections` already tells as pinned full-screen
+ * moments. Home now *teases* and `/collections` delivers, which also keeps three
+ * multi-megabyte photographs off the landing chunk.
+ *
+ * These ids must exist in `CANDLE_CATEGORIES`; unknown ids are skipped rather
+ * than rendering an empty spread.
  */
-const SHOWCASE_VARIANTS: ShowcaseVariant[] = [
-  'fullBleed',
-  'editorial',
-  'offsetFrame',
-  'splitReveal',
-  'editorial',
-  'fullBleed',
-];
+const FEATURED_COLLECTION_IDS = [
+  'traditional-festive',
+  'sculptural-decorative',
+  'bespoke-personalized',
+] as const;
+
+/**
+ * Layout treatment per featured spread. Three different variants for three
+ * blocks, so no two consecutive spreads resolve the same way.
+ */
+const FEATURED_VARIANTS: ShowcaseVariant[] = ['fullBleed', 'offsetFrame', 'splitReveal'];
 
 /** Props for {@link LandingHero}. */
-interface LandingHeroProps {
-  /** Handler invoked with a collection id when a showcase is activated. */
+export interface LandingHeroProps {
+  /** Handler invoked with a collection id when a showcase or row is activated. */
   onSelectCategory: (categoryId: string) => void;
+  /** Navigates to the full collections story at `/collections`. */
+  onOpenCollectionsStory: () => void;
 }
 
 /**
- * LandingHero is the home page composition: a typographic opening statement, the
- * promotional carousel, six editorial collection showcases, and the campaign
- * wall.
+ * Applies the site's max width and gutters to one section.
  *
- * The collections were previously a uniform `CategoryCard` grid — the same
- * component and layout the catalogue page used. They are now
- * {@link CollectionShowcase} blocks, each with its own layout variant and
- * scroll-reveal, so the page reads as a sequence of spreads rather than a
- * database listing.
+ * The home page is full-bleed at the page level — the hero, the typographic band,
+ * and the gifting ribbon all run edge-to-edge — so containment is opted into per
+ * section rather than imposed by a page wrapper.
  */
-export const LandingHero: React.FC<LandingHeroProps> = ({ onSelectCategory }) => {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useReducedMotion();
+const Contained: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className,
+}) => <div className={cn(DESIGN_TOKENS.layout.contained, className)}>{children}</div>;
 
-  useGSAP(
-    () => {
-      if (prefersReducedMotion) {
-        settleInstantly(['.hero-eyebrow', '.hero-line', '.hero-subtitle']);
-        return;
-      }
+/**
+ * LandingHero composes the home page as seven distinct screens:
+ *
+ * 1. {@link HeroChamber} — centred display type in a candle-lit chamber.
+ * 2. Offers carousel — full-bleed photography, autoplaying.
+ * 3. Three featured {@link CollectionShowcase} spreads.
+ * 4. Reasons band — oversized type, scroll-driven, no imagery.
+ * 5. Gifting ribbon — drifting occasion cards.
+ * 6. {@link CollectionIndexRail} — all six collections as a type-led contents page.
+ * 7. {@link CampaignShowcase} — the campaign and collaboration wall.
+ *
+ * The rhythm alternates image-led and type-led screens so no two consecutive
+ * sections resolve alike, and screens 1, 4 and 7 ship no photography at all —
+ * which is what lets the page grow from four sections to seven without getting
+ * heavier.
+ *
+ * This component is composition only. Every screen owns its own motion and its
+ * own reduced-motion branch.
+ */
+export const LandingHero: React.FC<LandingHeroProps> = ({
+  onSelectCategory,
+  onOpenCollectionsStory,
+}) => {
+  const offersRef = useRef<HTMLDivElement>(null);
 
-      const tl = gsap.timeline({ defaults: { ease: EASE.enter } });
+  const featured = FEATURED_COLLECTION_IDS.map((id) =>
+    CANDLE_CATEGORIES.find((category) => category.id === id)
+  ).filter((category): category is NonNullable<typeof category> => Boolean(category));
 
-      tl.fromTo('.hero-eyebrow', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: DURATION.fast })
-        // Per-line stagger rather than one block fade: the headline assembles
-        // itself, which is the single most "premium" beat on the page.
-        .fromTo(
-          '.hero-line',
-          { y: 46, opacity: 0 },
-          { y: 0, opacity: 1, duration: DURATION.slow, stagger: 0.12 },
-          '-=0.1'
-        )
-        .fromTo(
-          '.hero-subtitle',
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: DURATION.base },
-          '-=0.5'
-        );
-    },
-    { scope: heroRef, dependencies: [prefersReducedMotion] }
-  );
+  /** Scroll cue target: the offers carousel, i.e. the next screen down. */
+  const scrollToOffers = () => {
+    offersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
-    <div ref={heroRef} className={cn(DESIGN_TOKENS.layout.sectionGap, 'pb-24 pt-6')}>
-      {/* Opening statement. Type-led, no photography — the first impression is
-          the brand's voice, and the carousel below carries the imagery. */}
-      <section className="max-w-5xl space-y-8">
-        <span className="hero-eyebrow inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
-          <Flame className="h-3.5 w-3.5 text-amber-500" /> Handcrafted Artisanal Luxury
-        </span>
+    <div className="pb-24">
+      {/* 1 — Hero */}
+      <HeroChamber onScrollCue={scrollToOffers} />
 
-        <h1 className={cn(DESIGN_TOKENS.typography.heroTitle, 'text-stone-900 dark:text-stone-100')}>
-          {/* Each line is its own element with `overflow-hidden`, so the stagger
-              reads as type rising out of the page rather than fading in place. */}
-          <span className="hero-line block overflow-hidden">Crafted to</span>
-          <span className="hero-line block overflow-hidden font-light italic text-amber-500">
-            illuminate
-          </span>
-          <span className="hero-line block overflow-hidden">your world.</span>
-        </h1>
-
-        <p
-          className={cn(
-            'hero-subtitle max-w-2xl text-base font-light leading-relaxed text-stone-600 dark:text-stone-400 sm:text-xl'
-          )}
-        >
-          From custom fragrance blends and frosted glass jars to playful food-mimicking sculptures
-          and festive urlis — artisanal soy wax, poured by hand for quiet luxury.
-        </p>
-      </section>
-
-      <section aria-label="Featured promotions">
-        <PromotionalCarousel />
-      </section>
-
-      {/* Six collections, six distinct editorial spreads. */}
-      <section aria-labelledby="collections-heading" className="space-y-16 sm:space-y-24 lg:space-y-32">
-        <div className="max-w-2xl space-y-4">
-          <span className={DESIGN_TOKENS.typography.eyebrow}>Six collections</span>
-          <h2 id="collections-heading" className={DESIGN_TOKENS.typography.sectionTitle}>
-            <span className="text-stone-900 dark:text-stone-100">Every flame begins as</span>{' '}
-            <span className="font-semibold text-amber-500">an intention</span>
-          </h2>
+      <div className={DESIGN_TOKENS.layout.sectionGap}>
+        {/* 2 — Offers. Contained so the rounded frame reads as a frame. */}
+        <div ref={offersRef} className="scroll-mt-24">
+          <Contained>
+            <PromotionalCarousel placement="offers" />
+          </Contained>
         </div>
 
-        {CANDLE_CATEGORIES.map((category, idx) => (
-          <CollectionShowcase
-            key={category.id}
-            category={category}
-            index={idx + 1}
-            variant={SHOWCASE_VARIANTS[idx % SHOWCASE_VARIANTS.length]}
-            flipped={idx % 2 === 1}
-            onSelect={onSelectCategory}
-            eager={idx === 0}
-          />
-        ))}
-      </section>
+        {/* 3 — Featured collections */}
+        <Contained>
+          <section
+            aria-labelledby="featured-heading"
+            className="space-y-16 sm:space-y-24 lg:space-y-32"
+          >
+            <div className="max-w-2xl space-y-4">
+              <span className={DESIGN_TOKENS.typography.eyebrow}>Currently featured</span>
+              <h2 id="featured-heading" className={DESIGN_TOKENS.typography.sectionTitle}>
+                <span className="text-stone-900 dark:text-stone-100">Three pours worth</span>{' '}
+                <span className="font-semibold text-amber-500">lingering over</span>
+              </h2>
+            </div>
 
-      <CampaignShowcase />
+            {featured.map((category, idx) => (
+              <CollectionShowcase
+                key={category.id}
+                category={category}
+                index={idx + 1}
+                variant={FEATURED_VARIANTS[idx % FEATURED_VARIANTS.length]}
+                flipped={idx % 2 === 1}
+                onSelect={onSelectCategory}
+                eager={idx === 0}
+              />
+            ))}
+          </section>
+        </Contained>
+
+        {/* 4 — Reasons band. Full-bleed and self-pinning; owns its own gutters. */}
+        <PromotionalCarousel placement="reasons" />
+
+        {/* 5 — Gifting ribbon. Full-bleed so cards can drift off both edges. */}
+        <PromotionalCarousel placement="gifting" />
+
+        {/* 6 — All six collections */}
+        <CollectionIndexRail
+          onSelectCategory={onSelectCategory}
+          onOpenStory={onOpenCollectionsStory}
+        />
+
+        {/* 7 — Campaigns */}
+        <Contained>
+          <CampaignShowcase />
+        </Contained>
+      </div>
     </div>
   );
 };

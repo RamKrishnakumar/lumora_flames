@@ -63,14 +63,20 @@ const PageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 /* ==========================================================================
    1. HOME (/)
+   Full-bleed like the collections story: the hero fills the viewport and two
+   sections run edge-to-edge, so it opts out of PageShell and each contained
+   section applies its own gutters.
    ========================================================================== */
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <PageShell>
-      <LandingHero onSelectCategory={(id) => navigate(`/category/${id}`)} />
-    </PageShell>
+    <main className="min-h-screen">
+      <LandingHero
+        onSelectCategory={(id) => navigate(`/category/${id}`)}
+        onOpenCollectionsStory={() => navigate('/collections')}
+      />
+    </main>
   );
 };
 

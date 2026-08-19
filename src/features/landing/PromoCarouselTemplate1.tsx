@@ -2,30 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, Flame, Pause, Play } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import type { PromoSlide } from '../../types/promotion';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { cn } from '../../lib/utils';
 import { DESIGN_TOKENS } from '../../theme/designSystem';
 import { EASE } from '../../lib/animations';
-
-/** One promotional placement in the carousel. */
-export interface PromoSlide {
-  /** Stable key, also used to re-key the `<img>` so the browser reloads it. */
-  id: string;
-  /** Small uppercase label above the headline. */
-  tagline: string;
-  /** Headline, rendered light-weight. */
-  title: string;
-  /** Trailing fragment of the headline, rendered in amber italic. */
-  highlightText: string;
-  /** One or two sentences of supporting copy. */
-  description: string;
-  /** Imported image module — never a raw `src/...` string path. */
-  bgImage: string;
-  /** CTA label. */
-  ctaText: string;
-  /** `CANDLE_CATEGORIES` id the CTA navigates to. */
-  targetCollectionId: string;
-}
 
 /** Props for {@link PromotionalCarouselTemplate1}. */
 export interface PromotionalCarouselTemplate1Props {
@@ -35,6 +16,12 @@ export interface PromotionalCarouselTemplate1Props {
   onNavigateCollection: (collectionId: string) => void;
   /** Milliseconds each slide holds before advancing. */
   autoSlideInterval?: number;
+  /**
+   * Accessible name for the carousel region. Set it per placement — several
+   * carousels share this template on one page, and identical labels leave a
+   * screen-reader user unable to tell them apart in a landmark list.
+   */
+  label?: string;
 }
 
 /**
@@ -57,6 +44,7 @@ export const PromotionalCarouselTemplate1: React.FC<PromotionalCarouselTemplate1
   slides,
   onNavigateCollection,
   autoSlideInterval = 7000,
+  label = 'Featured promotions',
 }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   /** Visitor's explicit play/pause choice, via the toggle. */
@@ -133,13 +121,32 @@ export const PromotionalCarouselTemplate1: React.FC<PromotionalCarouselTemplate1
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, []);
 
+  /*
+   * Warm the next slide's photograph.
+   *
+   * Only the active slide's `<img>` is mounted (it is re-keyed on change), which
+   * keeps the initial cost to one image — but it also means advancing starts a
+   * fetch from cold, and these are multi-megabyte PNGs. Decoding the next one
+   * during the current slide's dwell means the transition has something to show.
+   * Deliberately one ahead, not all of them.
+   */
+  useEffect(() => {
+    if (total < 2) return;
+
+    const next = slides[(activeIdx + 1) % total];
+    if (!next) return;
+
+    const preloader = new Image();
+    preloader.src = next.bgImage;
+  }, [activeIdx, slides, total]);
+
   if (!slide) return null;
 
   return (
     <section
       ref={containerRef}
       aria-roledescription="carousel"
-      aria-label="Featured collections"
+      aria-label={label}
       onMouseEnter={() => setIsEngaged(true)}
       onMouseLeave={() => setIsEngaged(false)}
       // `focus`/`blur` don't bubble; the capturing `-in`/`-out` pair does, so
@@ -156,8 +163,10 @@ export const PromotionalCarouselTemplate1: React.FC<PromotionalCarouselTemplate1
         key={slide.id}
         src={slide.bgImage}
         alt={`${slide.title} ${slide.highlightText}`}
-        /* Sits high on the landing page, so the first paint should not wait. */
-        loading="eager"
+        /* The first slide is near the top of the page, so its paint shouldn't
+           wait on the lazy-load heuristic. Later slides mount only once they're
+           active, by which point the effect above has already warmed them. */
+        loading={activeIdx === 0 ? 'eager' : 'lazy'}
         decoding="async"
         className="carousel-bg absolute inset-0 h-full w-full object-cover"
       />
