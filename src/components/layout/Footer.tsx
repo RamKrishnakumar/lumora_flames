@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Camera, Users, Bookmark, MessageCircle, Play, Briefcase } from 'lucide-react';
 import { CANDLE_CATEGORIES } from '../../data/categories';
+import { INSTAGRAM, whatsappLink } from '../../data/contact';
 import { cn } from '../../lib/utils';
 import { DESIGN_TOKENS } from '../../theme/designSystem';
 
@@ -18,8 +19,11 @@ interface SocialLink {
 }
 
 /**
- * Social placeholders. Replace each `href` with the brand's real profile URL as
- * the accounts go live; the layout needs no changes.
+ * Social links. Instagram and WhatsApp are the two real enquiry channels and
+ * come from `data/contact.ts` — the same source the About page's enquiry panel
+ * uses, so a changed number cannot go stale in one place and not the other. The
+ * rest are still platform-root placeholders; replace each `href` as the accounts
+ * go live and the layout needs no changes.
  *
  * Icons are generic glyphs, not brand logos: lucide-react v1 removed every brand
  * icon (Instagram, Facebook, YouTube, LinkedIn), so there is nothing to import.
@@ -28,10 +32,10 @@ interface SocialLink {
  * later, add `simple-icons` — don't reach for a second icon library casually.
  */
 const SOCIAL_LINKS: SocialLink[] = [
-  { label: 'Instagram', icon: Camera, href: 'https://instagram.com' },
+  { label: INSTAGRAM.label, icon: Camera, href: INSTAGRAM.url },
+  { label: 'WhatsApp', icon: MessageCircle, href: whatsappLink() },
   { label: 'Facebook', icon: Users, href: 'https://facebook.com' },
   { label: 'Pinterest', icon: Bookmark, href: 'https://pinterest.com' },
-  { label: 'WhatsApp', icon: MessageCircle, href: 'https://wa.me' },
   { label: 'YouTube', icon: Play, href: 'https://youtube.com' },
   { label: 'LinkedIn', icon: Briefcase, href: 'https://linkedin.com' },
 ];
