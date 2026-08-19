@@ -5,7 +5,7 @@ import { useGSAP } from '@gsap/react';
 import { ChevronDown, Flame } from 'lucide-react';
 import { CANDLE_CATEGORIES } from '../../data/categories';
 import { InteractiveCandleCanvas } from '../../components/canvas/InteractiveCandleCanvas';
-import { CandleSmoke } from '../../components/canvas/CandleSmoke';
+import { CandleSmoke, SMOKE_PUFF_COUNT } from '../../components/canvas/CandleSmoke';
 import { EmberField } from '../../components/ui/EmberField';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { cn } from '../../lib/utils';
@@ -200,44 +200,106 @@ export const HeroChamber: React.FC<HeroChamberProps> = ({ onScrollCue }) => {
        */
       const smoke = () => {
         placeSmoke();
-        return gsap
-          .timeline()
-          // Near-opaque at the peak. The wisps are no longer blurred and are no
-          // longer competing with the type for legibility, so there is nothing
-          // left to hide behind a low opacity.
-          .fromTo(
-            '.flame-smoke',
-            { opacity: 0, y: 0, x: 0, scaleY: 0.5, scaleX: 1, rotate: 0 },
-            { opacity: 'random(0.82, 0.97)', duration: 0.3, stagger: 0.06, ease: 'power1.out' }
-          )
-          // The rise. Widening and drifting as it climbs, the way real smoke
-          // loses coherence. Per-wisp randomness so three wisps don't move as one
-          // block; `power1.out` because smoke leaves a hot wick quickly and slows
-          // as it cools.
+        const tl = gsap.timeline();
+
+        /*
+         * The stem: one thin thread that leaves the wick fast and holds its line.
+         * It is short-lived on purpose — it exists to sell the *instant* of the
+         * blow-out, and a thread that survives the whole plume is the cylinder
+         * problem all over again. It stretches as it goes (`scaleY` to 1.8) the
+         * way a column of hot gas thins while it accelerates.
+         */
+        tl.fromTo(
+          '.flame-smoke-stem',
+          { opacity: 0, y: 0, x: 0, scaleY: 0.35, scaleX: 1, rotate: 0 },
+          { opacity: 0.7, duration: 0.12, ease: 'power2.out' },
+          0
+        )
           .to(
-            '.flame-smoke',
-            {
-              y: 'random(-120, -190)',
-              x: 'random(-26, 26)',
-              scaleY: 'random(2.4, 3.6)',
-              scaleX: 'random(2, 3.4)',
-              rotate: 'random(-14, 14)',
-              duration: 'random(1.9, 2.8)',
-              stagger: 0.09,
-              ease: 'power1.out',
-            },
-            0.1
+            '.flame-smoke-stem',
+            { y: -30, scaleY: 1.6, scaleX: 0.7, duration: 0.9, ease: 'power1.out' },
+            0.02
           )
-          // The fade, as its own tween on its own ease. Bundled into the rise it
-          // shared that tween's `power1.out` and so was almost gone in the first
-          // few frames, while the wisp was still visibly moving — smoke that
-          // vanishes before it has risen. `power2.in` holds it near the wick and
-          // thins it out at the top.
-          .to(
-            '.flame-smoke',
-            { opacity: 0, duration: 'random(1.7, 2.4)', stagger: 0.09, ease: 'power2.in' },
-            0.5
-          );
+          // Gone before the plume is even half-emitted. The thread is the *instant*
+          // of the blow-out; a thread that outlives the plume is the cylinder
+          // problem again, and by then the puffs already cover the wick.
+          .to('.flame-smoke-stem', { opacity: 0, duration: 0.45, ease: 'power2.in' }, 0.3);
+
+        /*
+         * The plume, one tween-set per puff rather than one staggered tween: a
+         * stagger shares its values across the batch, so every puff would travel
+         * the same distance over the same time and the plume would move as a rigid
+         * body. Per-puff tweens are what let each one have its own life.
+         *
+         * Emission spacing has to stay well under a puff's life or the column
+         * empties out behind the plume, and it *widens* as the batch goes on
+         * (`EMIT_GROWTH`). Even spacing put the whole batch out inside a second,
+         * so a beat later every puff had left the base and the smoke floated
+         * detached from the wick with a visible hole under it. Widening spacing
+         * keeps the base replenished while the wick is still hot and thins out as
+         * it cools, which is also just what a dying wick does. The small random
+         * jitter stops the spacing itself becoming an audible rhythm.
+         */
+        const EMIT = 0.04;
+        const EMIT_GROWTH = 0.07;
+
+        gsap.utils.toArray<HTMLElement>('.flame-smoke-puff').forEach((puff, index) => {
+          const delay =
+            0.03 + EMIT * index * (1 + EMIT_GROWTH * index) + gsap.utils.random(0, 0.04);
+
+          /*
+           * `age` runs 1 → 0 down the emission order, so it describes where a puff
+           * sits in the plume: the first one out is its head, the last is still at
+           * the wick. Rise, swell and drift all key off it, which is what gives
+           * the column its gradient — tight and dark at the base, stretched, broad
+           * and faint at the top. Drawing those per-puff at random instead left
+           * holes wherever two neighbours happened to pick far-apart values.
+           */
+          const age = 1 - index / (SMOKE_PUFF_COUNT - 1);
+          const rise = -(55 + age * 175) * gsap.utils.random(0.88, 1.12);
+          const life = gsap.utils.random(1.9, 2.6) + age * 0.5;
+
+          // Two-stage drift is what makes it curl rather than fan: a lean while
+          // the puff is still in the thermal, then a harder commit in a direction
+          // drawn independently once it has lost the column. One x tween can only
+          // ever draw a straight diagonal.
+          const lean = gsap.utils.random(-9, 9);
+          const drift = lean + gsap.utils.random(-30, 30) * (0.4 + age);
+
+          tl.fromTo(
+            puff,
+            // Starting scale is 0.8, not near-zero: a puff that begins at 0.3 is a
+            // 4px speck, and twenty specks at the base of the column read as dust,
+            // not smoke. It still swells, just from something already legible.
+            { opacity: 0, x: gsap.utils.random(-2, 2), y: 0, scale: 0.8, rotate: 0 },
+            { opacity: gsap.utils.random(0.55, 0.9), duration: 0.22, ease: 'power1.out' },
+            delay
+          )
+            // The rise. `power1.out` because smoke leaves a hot wick quickly and
+            // slows as it cools. The swell is the puff losing definition, and it
+            // scales with `age` too, so the column widens as it climbs — narrow at
+            // the wick, broad and diffuse at the top.
+            .to(
+              puff,
+              {
+                y: rise,
+                scale: (1.4 + age * 2.6) * gsap.utils.random(0.85, 1.15),
+                rotate: gsap.utils.random(-70, 70),
+                duration: life,
+                ease: 'power1.out',
+              },
+              delay + 0.03
+            )
+            .to(puff, { x: lean, duration: life * 0.35, ease: 'sine.inOut' }, delay + 0.03)
+            .to(puff, { x: drift, duration: life * 0.65, ease: 'sine.inOut' }, delay + life * 0.39)
+            // The fade gets its own ease. Bundled into the rise it inherited
+            // `power1.out` and was almost gone in the first few frames, while the
+            // puff was still visibly moving — smoke that vanishes before it has
+            // risen. `power2.in` holds it low and thins it out at the top.
+            .to(puff, { opacity: 0, duration: life * 0.85, ease: 'power2.in' }, delay + life * 0.3);
+        });
+
+        return tl;
       };
 
       /** Wick catches again: clear any wisps still in the air. */
