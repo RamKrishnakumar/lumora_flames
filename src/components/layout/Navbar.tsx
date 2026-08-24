@@ -287,7 +287,7 @@ export const Navbar: React.FC = () => {
           className="group flex shrink-0 items-center gap-1.5 rounded-full text-sm sm:text-base lg:text-lg font-light uppercase tracking-[0.12em] sm:tracking-[0.18em] lg:tracking-[0.2em] text-stone-900 dark:text-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
         >
           <span className="font-semibold text-amber-500">LUMORA</span>
-          <span className="font-extralight text-stone-500 dark:text-stone-400 transition-colors group-hover:text-amber-400">
+          <span className="font-semibold text-stone-900 dark:text-stone-400 transition-colors group-hover:text-amber-400">
             FLAMES
           </span>
         </button>
@@ -305,7 +305,7 @@ export const Navbar: React.FC = () => {
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent',
                   isActive
                     ? 'text-amber-500 font-semibold'
-                    : 'text-stone-700 dark:text-stone-300 hover:text-amber-500'
+                    : 'text-stone-900 font-semibold dark:text-stone-300 hover:text-amber-500'
                 )
               }
             >
