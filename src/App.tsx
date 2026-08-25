@@ -44,9 +44,9 @@ const SubCategoryShowcase = lazy(() =>
 const AboutStory = lazy(() =>
   import('./features/about/AboutStory').then((m) => ({ default: m.AboutStory }))
 );
-const ContactFormWorkflow = lazy(() =>
-  import('./features/contact/ContactFormWorkflow').then((m) => ({
-    default: m.ContactFormWorkflow,
+const ContactChannels = lazy(() =>
+  import('./features/contact/ContactChannels').then((m) => ({
+    default: m.ContactChannels,
   }))
 );
 
@@ -127,11 +127,15 @@ const AboutPage: React.FC = () => (
 );
 
 /* ==========================================================================
-   5. CONTACT & OTP VERIFICATION (/contact)
+   5. ENQUIRY CHANNELS (/contact)
+   Direct messaging links, not a form. There is no backend and nothing is
+   persisted — the page hands the reader off to WhatsApp or Instagram with the
+   brief pre-typed. `SubCategoryShowcase` passes `state.categoryTitle` here, and
+   `ContactChannels` reads it to name the collection in that pre-typed message.
    ========================================================================== */
 const ContactPage: React.FC = () => (
   <main className={`min-h-screen ${DESIGN_TOKENS.layout.headerOffset} px-4 pb-24`}>
-    <ContactFormWorkflow />
+    <ContactChannels />
   </main>
 );
 

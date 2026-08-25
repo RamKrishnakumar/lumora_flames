@@ -74,6 +74,81 @@ export const WHATSAPP = {
 export const whatsappLink = (message: string = WHATSAPP.prefilledMessage): string =>
   `https://wa.me/${WHATSAPP.number}?text=${encodeURIComponent(message)}`;
 
+/* ------------------------------------------------------------------ *
+ * Brief scaffold
+ * ------------------------------------------------------------------ */
+
+/**
+ * Fields seeded into the chat as empty labels, so the studio gets the brief in
+ * the visitor's *first* message instead of after three rounds of questions.
+ *
+ * This is the entire replacement for the retired inquiry form's structured
+ * fields. A label with a trailing space is a surprisingly strong prompt — most
+ * people fill in what is put in front of them, and the ones who delete it have
+ * lost nothing, whereas an empty compose box reliably produces "hi, is this
+ * available?".
+ *
+ * Kept to three deliberately. A pre-typed message long enough to scroll reads
+ * as a form, which is the friction we just removed.
+ */
+export const BRIEF_PROMPTS = ['Occasion', 'Quantity', 'Fragrance notes'] as const;
+
+/**
+ * Builds the pre-typed enquiry message, optionally naming what the reader was
+ * looking at when they clicked through.
+ *
+ * @param subject Collection or variety the reader arrived from, e.g.
+ *   `'Festive Urlis'`. Omit for a generic enquiry.
+ * @returns Multi-line message body, ready to hand to {@link whatsappLink}.
+ *
+ * @example
+ * whatsappLink(buildBriefMessage('Festive Urlis'))
+ */
+export const buildBriefMessage = (subject?: string): string => {
+  const opening = subject
+    ? `Hi Lumora Flames! I'd like to enquire about ${subject}.`
+    : WHATSAPP.prefilledMessage;
+
+  // Blank line between greeting and labels. WhatsApp preserves `\n`, and the gap
+  // is what makes the labels read as a list to fill in rather than as prose.
+  return [opening, '', ...BRIEF_PROMPTS.map((field) => `${field}: `)].join('\n');
+};
+
+/* ------------------------------------------------------------------ *
+ * Studio facts
+ * ------------------------------------------------------------------ */
+
+/**
+ * Sentinel for a fact not yet supplied.
+ *
+ * Rendering is *skipped* for any value still equal to this, so an unfilled panel
+ * ships as a shorter panel rather than showing a customer the word "TBC". The
+ * alternative — a hardcoded guess — is worse: a wrong reply window is a promise
+ * you didn't know you made.
+ */
+export const PLACEHOLDER = 'TBC';
+
+/**
+ * Operational facts shown on `/contact`.
+ *
+ * These absorb what the retired form's "when may we call you" field used to
+ * negotiate: a reader who can see the reply window and the hours does not need
+ * to be asked when to be called.
+ *
+ * **Fill all four in.** Until you do, `assertContactConfigured` warns in dev and
+ * the panel quietly omits the unfilled rows.
+ */
+export const STUDIO = {
+  /** How quickly a message is answered, e.g. `'within 24 hours'`. */
+  replyWindow: PLACEHOLDER,
+  /** When someone is actually reading messages, e.g. `'10am – 7pm, Mon to Sat'`. */
+  hours: PLACEHOLDER,
+  /** Where the studio pours, e.g. `'New Delhi, India'`. */
+  city: PLACEHOLDER,
+  /** Turnaround for a bespoke order, e.g. `'10–14 days'`. */
+  leadTime: PLACEHOLDER,
+} as const;
+
 /**
  * Warns in dev while the placeholders above are still in place.
  *
@@ -97,6 +172,20 @@ const assertContactConfigured = (): void => {
   if (!/^\d{8,15}$/.test(WHATSAPP.number)) {
     console.warn(
       `[contact] WHATSAPP.number ("${WHATSAPP.number}") is not 8–15 digits. wa.me will open an "invalid number" screen rather than fail visibly.`
+    );
+  }
+
+  // Same reasoning as the WhatsApp placeholder check above: an unfilled studio
+  // panel is invisible in the UI by design, so without this warning you would
+  // never learn it was empty until a customer asked a question it answers.
+  const unfilled = Object.entries(STUDIO)
+    .filter(([, value]) => value === PLACEHOLDER)
+    .map(([key]) => key);
+
+  if (unfilled.length > 0) {
+    console.warn(
+      `[contact] STUDIO facts still unset: ${unfilled.join(', ')}. ` +
+        'Each is hidden on /contact until filled in — see src/data/contact.ts.'
     );
   }
 };

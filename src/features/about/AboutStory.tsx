@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { Flame, Sparkles, MessageCircle, Camera, PhoneCall, ArrowUpRight } from 'lucide-react';
+import { Flame, Sparkles, MessageCircle, Camera, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { ASSET_IMAGES } from '../../data/assets';
 import { INSTAGRAM, whatsappLink } from '../../data/contact';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
@@ -307,15 +307,20 @@ export const AboutStory: React.FC = () => {
           </div>
 
           {/*
-            Three ways to start, ranked. WhatsApp first because a message costs a
-            reader nothing and lands with us instantly; the form last because it
-            is the highest-effort option, and offering it first has been enough
-            to lose the enquiry. It stays because some people would rather be
-            called back than start a chat.
+            Two ways to start, ranked, plus a way to see the rest. WhatsApp first
+            because a message costs a reader nothing and lands with us instantly.
+
+            The third was an inquiry form; it is now a link to `/contact`, which
+            lists the same channels alongside the studio's hours and lead time.
+            It is worth keeping because some readers want to know *when* they
+            will hear back before they commit to starting a chat — which is what
+            the form's "when may we call you" field was really negotiating.
 
             The two direct channels are `<a>`, not buttons with handlers: they
             leave the site, so they need middle-click, long-press and "copy link"
-            to behave — which only a real anchor gives.
+            to behave — which only a real anchor gives. The third stays a
+            `<button>` with `navigate`, and carries `ArrowRight` rather than
+            `ArrowUpRight`, because it moves within the site.
           */}
           <div className="flex w-full shrink-0 flex-col gap-3 lg:w-auto lg:min-w-[19rem]">
             <a
@@ -363,8 +368,8 @@ export const AboutStory: React.FC = () => {
                 DESIGN_TOKENS.typography.button
               )}
             >
-              <PhoneCall className="h-4 w-4" aria-hidden="true" />
-              Or have us contact you
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Studio hours and every channel
             </button>
           </div>
         </div>
