@@ -10,7 +10,7 @@ import { WHATSAPP, buildBriefMessage, whatsappLink } from './contact';
 
 describe('WhatsApp deep link', () => {
   it('holds a wa.me-usable number: 8-15 digits, no + or space', () => {
-    expect(WHATSAPP.number).toMatch(/^d{8,15}$/);
+    expect(WHATSAPP.number).toMatch(/^\d{8,15}$/);
   });
 
   it('encodes newlines so the brief survives the query string', () => {
