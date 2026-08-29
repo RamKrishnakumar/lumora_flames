@@ -113,8 +113,15 @@ export const SubCategoryShowcase: React.FC<SubCategoryShowcaseProps> = ({
 
   if (total === 0) {
     return (
-      <section className={cn('mx-auto max-w-xl px-6 py-32 text-center', DESIGN_TOKENS.layout.headerOffset)}>
-        <h1 className={cn(DESIGN_TOKENS.typography.sectionTitle, 'text-stone-900 dark:text-stone-100')}>
+      <section
+        className={cn('mx-auto max-w-xl px-6 py-32 text-center', DESIGN_TOKENS.layout.headerOffset)}
+      >
+        <h1
+          className={cn(
+            DESIGN_TOKENS.typography.sectionTitle,
+            'text-stone-900 dark:text-stone-100'
+          )}
+        >
           {category.title}
         </h1>
         <p className={cn(DESIGN_TOKENS.typography.body, 'mt-4 text-stone-600 dark:text-stone-400')}>
@@ -150,15 +157,17 @@ export const SubCategoryShowcase: React.FC<SubCategoryShowcaseProps> = ({
         </span>
 
         <h2
-          className={cn(
-            DESIGN_TOKENS.typography.panelTitle,
-            'text-stone-900 dark:text-stone-100'
-          )}
+          className={cn(DESIGN_TOKENS.typography.panelTitle, 'text-stone-900 dark:text-stone-100')}
         >
           {variety.name}
         </h2>
 
-        <p className={cn(DESIGN_TOKENS.typography.body, 'max-w-xl text-stone-600 dark:text-stone-400')}>
+        <p
+          className={cn(
+            DESIGN_TOKENS.typography.body,
+            'max-w-xl text-stone-600 dark:text-stone-400'
+          )}
+        >
           {variety.description}
         </p>
 
@@ -247,7 +256,11 @@ export const SubCategoryShowcase: React.FC<SubCategoryShowcaseProps> = ({
             className="grid items-center gap-10 border-t border-stone-200 pt-14 lg:grid-cols-2 dark:border-stone-800"
           >
             <div className="flex justify-center">
-              <InteractiveCandleCanvas flameIntensity={1} visual={variety.visual} label={variety.name} />
+              <InteractiveCandleCanvas
+                flameIntensity={1}
+                visual={variety.visual}
+                label={variety.name}
+              />
             </div>
             {renderNarrative(index, false)}
           </section>

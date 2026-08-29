@@ -9,21 +9,24 @@ import { useGSAP } from '@gsap/react';
 export const AmbientFlameGlow: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    const bubbles = gsap.utils.toArray<HTMLElement>('.ambient-orb');
+  useGSAP(
+    () => {
+      const bubbles = gsap.utils.toArray<HTMLElement>('.ambient-orb');
 
-    bubbles.forEach((orb) => {
-      gsap.to(orb, {
-        x: 'random(-60, 60)',
-        y: 'random(-60, 60)',
-        scale: 'random(0.85, 1.25)',
-        duration: 'random(6, 12)',
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
+      bubbles.forEach((orb) => {
+        gsap.to(orb, {
+          x: 'random(-60, 60)',
+          y: 'random(-60, 60)',
+          scale: 'random(0.85, 1.25)',
+          duration: 'random(6, 12)',
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+        });
       });
-    });
-  }, { scope: containerRef });
+    },
+    { scope: containerRef }
+  );
 
   return (
     <div

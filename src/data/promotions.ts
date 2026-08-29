@@ -76,8 +76,7 @@ export const REASON_SLIDES: ReasonSlide[] = [
     lead: 'A room does not change',
     highlight: 'until you light it',
     trail: '.',
-    support:
-      'One flame redraws a space more completely than any object you could put in it.',
+    support: 'One flame redraws a space more completely than any object you could put in it.',
     ctaText: 'Browse jars & vessels',
     targetCollectionId: 'container-jar',
   },
@@ -86,8 +85,7 @@ export const REASON_SLIDES: ReasonSlide[] = [
     lead: 'Scent is the shortest road',
     highlight: 'back to a memory',
     trail: '.',
-    support:
-      'Smell reaches memory before language does. It is the only sense wired that directly.',
+    support: 'Smell reaches memory before language does. It is the only sense wired that directly.',
     ctaText: 'Blend your own scent',
     targetCollectionId: 'bespoke-personalized',
   },

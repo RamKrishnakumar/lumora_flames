@@ -146,7 +146,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        {/** 
+        {/**
          * basename comes from Vite's `base`, so a subpath deploy needs no code change.
          * Without it, every <Route path="/about"> would try to match the full pathname
          * "/LummoraFlames/pr-12/about" and fall through to the * redirect - a preview

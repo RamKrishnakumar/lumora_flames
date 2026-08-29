@@ -4,7 +4,7 @@ name: PR Quality & Preview
 # token agains the merge commit. pull_request_target would run trusted
 # workflow code with write access against untrusted PR code - the standard
 # way repos get compromised. Keep it as-is.
-on: 
+on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
@@ -29,9 +29,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24      # Node 12 is this projects's machine default and
-                                # breaks every script with `Unexpected token ?`
-          cache: npm            # caches ~/.npm keyed on package-lock.json
+          node-version:
+            24 # Node 12 is this projects's machine default and
+            # breaks every script with `Unexpected token ?`
+          cache: npm # caches ~/.npm keyed on package-lock.json
 
       - run: npm ci
 
@@ -54,11 +55,11 @@ jobs:
   #-----------------------------------------------------------------------
   deploy-preview:
     name: Deploy preview
-    needs: quality              # never publish something that failed a check
+    needs: quality # never publish something that failed a check
     runs-on: ubuntu-latest
     permissions:
-      contents: write           # push to gh-pages
-      pull-requests: write       # post the URL comment
+      contents: write # push to gh-pages
+      pull-requests: write # post the URL comment
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -74,16 +75,16 @@ jobs:
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.number }}/
         run: npm run build
-      
+
       # Github Pages servers 404.hmtl for any unmatched path. Beacuse index.html
       # boots the router, which reads window.location itself, this on copy is
       # what makes /about survive a hard refresh.
       - name: Add SPA fallback
         run: cd dist/index.html dist/404.html
-      
+
       - name: Publish to gh-pages/pr-${{ github.event.number }}
         uses: peacheirish/actions-gh-pages@v4
-        with: 
+        with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           #Each PR gets its own folder, so preview never collide with each

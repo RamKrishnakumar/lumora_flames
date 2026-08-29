@@ -171,7 +171,9 @@ export const AboutStory: React.FC = () => {
           <Flame className="h-3.5 w-3.5 text-amber-500" /> Our Story
         </span>
 
-        <h1 className={cn(DESIGN_TOKENS.typography.heroTitle, 'text-stone-900 dark:text-stone-100')}>
+        <h1
+          className={cn(DESIGN_TOKENS.typography.heroTitle, 'text-stone-900 dark:text-stone-100')}
+        >
           We started with <span className="font-light italic text-amber-500">one</span> stubborn
           candle.
         </h1>
@@ -267,14 +269,19 @@ export const AboutStory: React.FC = () => {
 
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-14">
           {PILLARS.map((pillar, index) => (
-            <div key={pillar.title} className="about-pillar space-y-4 border-t border-stone-200 pt-6 dark:border-stone-800">
+            <div
+              key={pillar.title}
+              className="about-pillar space-y-4 border-t border-stone-200 pt-6 dark:border-stone-800"
+            >
               <span className="text-xs font-semibold tabular-nums text-amber-500">
                 {String(index + 1).padStart(2, '0')}
               </span>
               <h3 className="text-xl font-light tracking-tight text-stone-900 dark:text-stone-100 sm:text-2xl">
                 {pillar.title}
               </h3>
-              <p className={cn(DESIGN_TOKENS.typography.body, 'text-stone-600 dark:text-stone-400')}>
+              <p
+                className={cn(DESIGN_TOKENS.typography.body, 'text-stone-600 dark:text-stone-400')}
+              >
                 {pillar.body}
               </p>
             </div>
@@ -283,7 +290,10 @@ export const AboutStory: React.FC = () => {
       </section>
 
       {/* Enquiry panel */}
-      <section aria-labelledby="enquiry-heading" className={cn('rounded-[2.5rem] p-9 sm:p-14', DESIGN_TOKENS.glass.card)}>
+      <section
+        aria-labelledby="enquiry-heading"
+        className={cn('rounded-[2.5rem] p-9 sm:p-14', DESIGN_TOKENS.glass.card)}
+      >
         <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           <div className="max-w-xl space-y-4">
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
@@ -291,14 +301,18 @@ export const AboutStory: React.FC = () => {
             </span>
             <h2
               id="enquiry-heading"
-              className={cn(DESIGN_TOKENS.typography.sectionTitle, 'text-stone-900 dark:text-stone-100')}
+              className={cn(
+                DESIGN_TOKENS.typography.sectionTitle,
+                'text-stone-900 dark:text-stone-100'
+              )}
             >
               Tell us what you want made
             </h2>
             <p className={cn(DESIGN_TOKENS.typography.body, 'text-stone-600 dark:text-stone-400')}>
               Nothing here is sitting on a shelf — every piece is poured after you ask for it, which
               means the vessel, the scent and the size are all still open. Message us with the
-              occasion and roughly how many you need, and we&apos;ll come back with what is possible.
+              occasion and roughly how many you need, and we&apos;ll come back with what is
+              possible.
             </p>
             <p className={cn(DESIGN_TOKENS.typography.body, 'text-stone-500 dark:text-stone-500')}>
               WhatsApp is quickest. {INSTAGRAM.handle} is where the work in progress goes, so it is

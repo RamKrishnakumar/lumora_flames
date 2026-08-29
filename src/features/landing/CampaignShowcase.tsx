@@ -160,7 +160,12 @@ export const CampaignShowcase: React.FC = () => {
               <h3 className="text-2xl font-light tracking-tight text-stone-900 dark:text-stone-100 sm:text-3xl">
                 {title}
               </h3>
-              <p className={cn(DESIGN_TOKENS.typography.body, 'max-w-md text-stone-600 dark:text-stone-400')}>
+              <p
+                className={cn(
+                  DESIGN_TOKENS.typography.body,
+                  'max-w-md text-stone-600 dark:text-stone-400'
+                )}
+              >
                 {body}
               </p>
             </div>

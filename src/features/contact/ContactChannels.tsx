@@ -117,7 +117,10 @@ export const ContactChannels: React.FC = () => {
           at — which is exactly the context the CTA already knew.
         */}
         <h1
-          className={cn(DESIGN_TOKENS.typography.sectionTitle, 'text-stone-900 dark:text-stone-100')}
+          className={cn(
+            DESIGN_TOKENS.typography.sectionTitle,
+            'text-stone-900 dark:text-stone-100'
+          )}
         >
           {subject ? `Let's talk about ${subject}` : 'Commission a candle'}
         </h1>

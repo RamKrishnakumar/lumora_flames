@@ -37,7 +37,8 @@ export const DESIGN_TOKENS = {
   },
   glass: {
     card: 'bg-white/70 dark:bg-stone-900/40 backdrop-blur-2xl border border-stone-200/80 dark:border-stone-800/80 shadow-2xl',
-    floatingBtn: 'bg-white/20 dark:bg-stone-950/30 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]',
+    floatingBtn:
+      'bg-white/20 dark:bg-stone-950/30 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]',
     /** Lighter frosted surface for chips and inline pills over photography. */
     chip: 'bg-white/10 dark:bg-stone-900/40 backdrop-blur-md border border-white/20 dark:border-white/10',
   },

@@ -9,20 +9,20 @@ import { WHATSAPP, buildBriefMessage, whatsappLink } from './contact';
  */
 
 describe('WhatsApp deep link', () => {
-    it('holds a wa.me-usable number: 8-15 digits, no + or space', () => {
-        expect(WHATSAPP.number).toMatch(/^d{8,15}$/);
-    });
+  it('holds a wa.me-usable number: 8-15 digits, no + or space', () => {
+    expect(WHATSAPP.number).toMatch(/^d{8,15}$/);
+  });
 
-    it('encodes newlines so the brief survives the query string', () => {
-        const url = whatsappLink(buildBriefMessage('Festive Urlis'));
-        expect(url).toContain('%0A');           // literal newlines would truncate it
-        expect(url).toContain('Festive%20Urlis');
-    });
+  it('encodes newlines so the brief survives the query string', () => {
+    const url = whatsappLink(buildBriefMessage('Festive Urlis'));
+    expect(url).toContain('%0A'); // literal newlines would truncate it
+    expect(url).toContain('Festive%20Urlis');
+  });
 
   it('names the collection when given one, and falls back when not', () => {
-        expect(buildBriefMessage('Diyas')).toContain('Diyas');
-        expect(buildBriefMessage()).toBe(
-        [WHATSAPP.prefilledMessage, '', 'Occasion: ', 'Quantity: ', 'Fragrance notes: '].join('\n')
-        );
-    });
-})
+    expect(buildBriefMessage('Diyas')).toContain('Diyas');
+    expect(buildBriefMessage()).toBe(
+      [WHATSAPP.prefilledMessage, '', 'Occasion: ', 'Quantity: ', 'Fragrance notes: '].join('\n')
+    );
+  });
+});

@@ -120,8 +120,18 @@ export const Navbar: React.FC = () => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.8 } });
 
       tl.fromTo(headerRef.current, { y: -60, opacity: 0 }, { y: 0, opacity: 1 })
-        .fromTo(logoRef.current, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 }, '-=0.4')
-        .fromTo('.nav-item', { y: -10, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, duration: 0.4 }, '-=0.3');
+        .fromTo(
+          logoRef.current,
+          { scale: 0.8, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.5 },
+          '-=0.4'
+        )
+        .fromTo(
+          '.nav-item',
+          { y: -10, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.08, duration: 0.4 },
+          '-=0.3'
+        );
     },
     { scope: headerRef, dependencies: [prefersReducedMotion] }
   );
@@ -149,7 +159,12 @@ export const Navbar: React.FC = () => {
           { y: -16, opacity: 0, scale: 0.97 },
           { y: 0, opacity: 1, scale: 1, duration: 0.4 },
           0
-        ).fromTo('.drawer-item', { y: -8, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.06, duration: 0.3 }, 0.12);
+        ).fromTo(
+          '.drawer-item',
+          { y: -8, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.06, duration: 0.3 },
+          0.12
+        );
 
         return;
       }
@@ -331,7 +346,11 @@ export const Navbar: React.FC = () => {
             title={isDark ? 'Daylight' : 'Candle Mode'}
             className={ICON_BUTTON_CLASS}
           >
-            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-stone-700" />}
+            {isDark ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-stone-700" />
+            )}
           </button>
 
           <button

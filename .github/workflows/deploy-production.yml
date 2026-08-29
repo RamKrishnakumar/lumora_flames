@@ -5,8 +5,8 @@ name: Deploy Production
 on:
   push:
     branches: [main]
-  workflow_dispatch:        # lets you re-deploy the current main by hand,
-                            # e.g. after fixing Pages settings, without a commit
+  workflow_dispatch: # lets you re-deploy the current main by hand,
+    # e.g. after fixing Pages settings, without a commit
 
 # Never two prodcution deploys at once - they would ract to push gh-pages and
 # one would lose. No cancel-in-progress: a deploy that started should finish.
@@ -37,7 +37,7 @@ jobs:
 
       - name: Add SPA fallback
         run: cp dist/index.html dist/404.html
-      
+
       - name: Publish to gh-pages root
         uses: peaceiris/actions-gh-pages@v4
         with:
