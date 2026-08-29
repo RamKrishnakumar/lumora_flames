@@ -80,10 +80,10 @@ jobs:
       # boots the router, which reads window.location itself, this on copy is
       # what makes /about survive a hard refresh.
       - name: Add SPA fallback
-        run: cd dist/index.html dist/404.html
+        run: cp dist/index.html dist/404.html
 
       - name: Publish to gh-pages/pr-${{ github.event.number }}
-        uses: peacheirish/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
