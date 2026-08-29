@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Lumora Flames — marketing & catalog site for a handcrafted artisanal candle brand (festive urlis and diyas, bespoke fragrance blends, food-mimicking wax sculptures, and raw materials for DIY candle makers). No cart or checkout; the conversion path is the "Bespoke Concierge" inquiry form at `/contact`.
+Lumora Flames — marketing & catalog site for a handcrafted artisanal candle brand (festive urlis and diyas, bespoke fragrance blends, food-mimicking wax sculptures, and raw materials for DIY candle makers). No cart, no checkout, and no inquiry form; the conversion path is a direct message, via the WhatsApp and Instagram links at `/contact`.
 
 React 19 + Vite 8 + Tailwind v4 + GSAP. No backend, no tests.
 
@@ -11,7 +11,10 @@ Read the relevant doc **before** writing code — don't infer conventions from a
 | Task | Read |
 | --- | --- |
 | Building or restyling a promotional carousel; needing design concepts for one | [`docs/promoCarousal.md`](docs/promoCarousal.md) |
-| Adding a route, component, or feature; deciding where a file belongs; changing data flow or theming | [`docs/architecture.md`](docs/architecture.md) |
+| **Writing any code at all** — the JSDoc standard, the DRY rules, naming, motion, accessibility, and how a change is verified | [`docs/architecture.md#coding-rules`](docs/architecture.md#coding-rules) |
+| Adding a route, component, or feature; deciding where a new file belongs | [`docs/architecture.md#where-a-new-file-goes`](docs/architecture.md#where-a-new-file-goes) |
+| Understanding how a screen, CTA, or piece of content connects to the rest | [`docs/architecture.md#navigation-tree`](docs/architecture.md#navigation-tree) |
+| Anything touching how content is edited or published, or the admin-panel plan | [`docs/architecture.md#the-publishing-constraint`](docs/architecture.md#the-publishing-constraint) |
 | Any visual work — colour, type, spacing, motion, glass surfaces | [`docs/design-system.md`](docs/design-system.md) |
 
 For a small change inside one existing component, matching that file's surrounding style is enough. For anything new, or anything visual, read the docs first.
@@ -46,14 +49,16 @@ There is no test suite — verify changes by running `npm run dev` and checking 
 - **Cross-cutting groupings are not categories.** "Gifting" lives in `data/promotions.ts` and maps onto existing ids. Don't add it to `CANDLE_CATEGORIES`.
 - **No cards-and-grids for content.** Collections and varieties are told as full-bleed scroll moments, not repeated tiles. Each of the six collections gets its *own* treatment, not the same effect six times.
 - **Every animated component needs a reduced-motion branch** — skip the pin, skip the autoplay, `clearProps` so nothing is stranded invisible. Animate transforms and opacity, never layout properties.
-- **Nothing is persisted before OTP verification.** `lib/verification.ts` owns both the code check and the write in one call so the ordering can't be bypassed; add backends by implementing `VerificationProvider`, not by calling out from the form.
+- **There is no backend, and `/contact` collects nothing.** The inquiry form, its OTP verification and the `VerificationProvider` seam were all deleted deliberately — a form needing a server, a database and a verified number was more infrastructure than the inquiry volume justifies. Enquiries arrive as WhatsApp or Instagram messages. Don't reintroduce a form, a fetch to an API, or a lead store without agreeing it first; the site is a static build and staying that way is the point.
+- **`data/contact.ts` is the only source of handles, numbers and studio facts.** It appears in `Footer`, `AboutStory` and `ContactChannels`, and a number that is right in one and stale in another is worse than no number. Unfilled values use the `PLACEHOLDER` sentinel and are hidden from the page rather than rendered; `assertContactConfigured()` warns about them in dev only.
 - **lucide-react v1 has no brand icons** (no Instagram/Facebook/YouTube/LinkedIn). Use a generic glyph with an `aria-label`, or add `simple-icons` deliberately.
 - **`Draggable`/`InertiaPlugin` are free (GSAP 3.13+) but must be dynamically imported.** They're ~117 KB of source; a static import in `PromoCarouselTemplate3` took the landing chunk from 22 KB to 88 KB. Guard the async gap with a `cancelled` flag so a Draggable created after teardown still gets killed. Check the built chunk sizes after touching a GSAP plugin import.
 - **The home page is full-bleed** — `/` and `/collections` opt out of `PageShell` and contain per section. Adding a section means keeping the alternating image-led / type-led rhythm; see [`docs/architecture.md`](docs/architecture.md#home-page-composition).
 
 ## Known gaps
 
-- The OTP provider is a mock — code `123456`, persists nothing. The seam is `verificationProvider` in `src/lib/verification.ts`; swap it for a Supabase/Firebase implementation of the same interface and no component changes.
+- The four `STUDIO` facts in `src/data/contact.ts` (reply window, hours, city, bespoke lead time) are still the `PLACEHOLDER` sentinel, so the studio panel on `/contact` renders empty and is skipped. Filling them in is a copy task, not a code one.
+- Enquiries are not recorded anywhere — they live in the studio's WhatsApp and Instagram inboxes. There is no log, no lead list, and no analytics on the conversion path. Accepted deliberately; see the hard rule above before proposing a fix.
 - Source photos are 2–3 MB PNGs and dominate the bundle (~19 MB of assets against a 411 KB entry chunk). Converting to `.webp` is the single biggest available performance win; routes and below-fold images are already split and lazy.
 - No SEO/meta handling. `index.html` still has the default `lumora_flames` title.
 - Social links in `Footer` point at platform roots, not real brand profiles.
