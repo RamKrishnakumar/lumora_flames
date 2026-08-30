@@ -29,10 +29,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version:
-            24 # Node 12 is this projects's machine default and
-            # breaks every script with `Unexpected token ?`
-          cache: npm # caches ~/.npm keyed on package-lock.json
+          # Node 12 is this project's machine default and breaks every script
+          # with a bare `Unexpected token ?`.
+          node-version: 24
+          # Caches ~/.npm, keyed on package-lock.json.
+          cache: npm
 
       - run: npm ci
 

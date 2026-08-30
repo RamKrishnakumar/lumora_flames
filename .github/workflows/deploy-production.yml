@@ -26,6 +26,15 @@ jobs:
         with:
           node-version: 24
           cache: npm
+
+      # Installs from the lockfile exactly. Without this the runner has no
+      # node_modules at all, so `npm run lint` dies with `eslint: not found`
+      # (exit 127) rather than a lint failure.
+      - run: npm ci
+
+      # Re-run the gates even though the PR already passed them. Cheap
+      # insurance: rulesets can be bypassed, and a merge commit combines two
+      # branches that neither one tested on its own.
       - run: npm run lint
       - run: npm run format:check
       - run: npm run test

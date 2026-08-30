@@ -2,3 +2,9 @@ dist
 node_modules
 package-lock.json
 *.md
+
+# CI config. Prettier reflows YAML around trailing comments — it moved a
+# `node-version: 24` onto its own line and split the comment explaining it
+# across two. In workflow files the comments are the documentation, so
+# readability wins over formatting consistency.
+.github/workflows
