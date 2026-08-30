@@ -22,8 +22,9 @@ gsap.registerPlugin(ScrollTrigger);
  * lookup misses, and `InteractiveCandleCanvas` renders its neutral jar — the
  * hero must never blank out over a content edit.
  */
-const HERO_VISUAL = CANDLE_CATEGORIES.find((c) => c.id === 'traditional-festive')
-  ?.subCategories.find((s) => s.id === 'urli-diya')?.visual;
+const HERO_VISUAL = CANDLE_CATEGORIES.find(
+  (c) => c.id === 'traditional-festive'
+)?.subCategories.find((s) => s.id === 'urli-diya')?.visual;
 
 /**
  * Scroll distance, in viewport heights, spent lighting the candle before the
@@ -90,12 +91,7 @@ export const HeroChamber: React.FC<HeroChamberProps> = ({ onScrollCue }) => {
 
       // The dark chamber and the unlit candle settle first, then the type
       // arrives into it — the order is the point.
-      tl.fromTo(
-        candleRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1.4 },
-        0.15
-      )
+      tl.fromTo(candleRef.current, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.4 }, 0.15)
         .fromTo(
           '.hero-eyebrow',
           { y: 20, opacity: 0 },
@@ -366,7 +362,12 @@ export const HeroChamber: React.FC<HeroChamberProps> = ({ onScrollCue }) => {
           0
         )
         // Sparks only exist once there's a fire to throw them.
-        .fromTo('.hero-embers', { opacity: 0 }, { opacity: 1, duration: 0.6, ease: EASE.scrub }, 0.3)
+        .fromTo(
+          '.hero-embers',
+          { opacity: 0 },
+          { opacity: 1, duration: 0.6, ease: EASE.scrub },
+          0.3
+        )
         // The type clears on the same timeline rather than from a second
         // ScrollTrigger. A trigger anchored to this section would be anchored to
         // a *pinned* element and mismeasure; sharing the timeline also means the
@@ -538,12 +539,7 @@ export const HeroChamber: React.FC<HeroChamberProps> = ({ onScrollCue }) => {
           Handcrafted Artisanal Luxury
         </span>
 
-        <h1
-          className={cn(
-            DESIGN_TOKENS.typography.heroTitle,
-            'text-stone-900 dark:text-stone-50'
-          )}
-        >
+        <h1 className={cn(DESIGN_TOKENS.typography.heroTitle, 'text-stone-900 dark:text-stone-50')}>
           {/* Each line is its own block so the stagger reads as type rising out
               of the page rather than fading in place. */}
           <span className="hero-line block">Crafted to</span>

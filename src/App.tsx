@@ -146,7 +146,13 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <Router>
+        {/**
+         * basename comes from Vite's `base`, so a subpath deploy needs no code change.
+         * Without it, every <Route path="/about"> would try to match the full pathname
+         * "/LummoraFlames/pr-12/about" and fall through to the * redirect - a preview
+         * that loads the home page and nothing else.
+         */}
+        <Router basename={import.meta.env.BASE_URL}>
           <div className="relative min-h-screen w-full bg-stone-50 text-stone-900 transition-colors duration-500 dark:bg-stone-950 dark:text-stone-100">
             <AmbientFlameGlow />
 

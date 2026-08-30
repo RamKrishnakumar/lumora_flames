@@ -21,12 +21,7 @@ export const SMOKE_PUFF_COUNT = 20;
  * version read as machined. Each is slightly taller than wide so that GSAP's
  * `rotate` has something to bite on — rotating a perfect circle is invisible.
  */
-const PUFF_SIZES = [
-  'h-4 w-3 -ml-[6px]',
-  'h-5 w-3.5 -ml-[7px]',
-  'h-6 w-4 -ml-2',
-  'h-5 w-4 -ml-2',
-];
+const PUFF_SIZES = ['h-4 w-3 -ml-[6px]', 'h-5 w-3.5 -ml-[7px]', 'h-6 w-4 -ml-2', 'h-5 w-4 -ml-2'];
 
 /** Props for {@link CandleSmoke}. */
 export interface CandleSmokeProps {

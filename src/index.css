@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Dark mode is driven by a `.dark` class on <html>, set by ThemeProvider. */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -18,7 +18,9 @@
   body {
     margin: 0;
     font-family: var(--font-sans);
-    transition: background-color 0.4s ease, color 0.4s ease;
+    transition:
+      background-color 0.4s ease,
+      color 0.4s ease;
   }
 
   /* Typography is owned by DESIGN_TOKENS (src/theme/designSystem.ts).

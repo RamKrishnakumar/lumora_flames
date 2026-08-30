@@ -89,14 +89,24 @@ export const PromotionalCarouselTemplate1: React.FC<PromotionalCarouselTemplate1
         { scale: 1.15, filter: 'blur(10px)' },
         { scale: 1, filter: 'blur(0px)', duration: 1.2, ease: EASE.enter }
       )
-        .fromTo('.carousel-eyebrow', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, '-=0.8')
+        .fromTo(
+          '.carousel-eyebrow',
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6 },
+          '-=0.8'
+        )
         .fromTo(
           '.carousel-title',
           { y: 40, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.8, ease: EASE.enter },
           '-=0.5'
         )
-        .fromTo('.carousel-desc', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, '-=0.4');
+        .fromTo(
+          '.carousel-desc',
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6 },
+          '-=0.4'
+        );
     },
     { scope: containerRef, dependencies: [activeIdx, slides, prefersReducedMotion] }
   );
@@ -224,7 +234,9 @@ export const PromotionalCarouselTemplate1: React.FC<PromotionalCarouselTemplate1
                     aria-hidden="true"
                     className={cn(
                       'h-2 rounded-full transition-all duration-500',
-                      idx === activeIdx ? 'w-8 bg-amber-400' : 'w-2 bg-white/40 group-hover:bg-white/70'
+                      idx === activeIdx
+                        ? 'w-8 bg-amber-400'
+                        : 'w-2 bg-white/40 group-hover:bg-white/70'
                     )}
                   />
                 </button>
@@ -238,7 +250,9 @@ export const PromotionalCarouselTemplate1: React.FC<PromotionalCarouselTemplate1
                 <button
                   type="button"
                   onClick={() => setIsPlaying((prev) => !prev)}
-                  aria-label={isPlaying ? 'Pause automatic slideshow' : 'Resume automatic slideshow'}
+                  aria-label={
+                    isPlaying ? 'Pause automatic slideshow' : 'Resume automatic slideshow'
+                  }
                   title={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
                   className="ml-1 inline-flex h-11 w-11 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                 >

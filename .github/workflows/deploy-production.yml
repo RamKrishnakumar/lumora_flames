@@ -1,0 +1,50 @@
+name: Deploy Production
+
+# A merged PR **is** a push to main, so this covers merges and any direct push.
+# Simpler and harder to bypass than listening for pull_request: closed.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # lets you re-deploy the current main by hand,
+    # e.g. after fixing Pages settings, without a commit
+
+# Never two prodcution deploys at once - they would ract to push gh-pages and
+# one would lose. No cancel-in-progress: a deploy that started should finish.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run test
+
+      - name: Build for productoin
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+        run: npm run build
+
+      - name: Add SPA fallback
+        run: cp dist/index.html dist/404.html
+
+      - name: Publish to gh-pages root
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          # THE CRiTICAL LIne. Without keep_files, publishing to the root
+          # wipes the branch - deleting every open PR's preview folder
+          # on every production deploy.
+          keep_files: true
+          commit_message: 'deploy: ${{ github.sha }}'

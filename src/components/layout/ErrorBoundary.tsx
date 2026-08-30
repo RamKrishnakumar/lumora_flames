@@ -51,12 +51,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         role="alert"
         className="flex min-h-screen items-center justify-center bg-stone-50 px-6 dark:bg-stone-950"
       >
-        <div className={cn('max-w-lg space-y-6 rounded-3xl p-10 text-center', DESIGN_TOKENS.glass.card)}>
+        <div
+          className={cn(
+            'max-w-lg space-y-6 rounded-3xl p-10 text-center',
+            DESIGN_TOKENS.glass.card
+          )}
+        >
           <div className="inline-flex rounded-full bg-amber-500/10 p-4 text-amber-500">
             <AlertTriangle className="h-8 w-8" />
           </div>
 
-          <h1 className={cn(DESIGN_TOKENS.typography.sectionTitle, 'text-stone-900 dark:text-stone-100')}>
+          <h1
+            className={cn(
+              DESIGN_TOKENS.typography.sectionTitle,
+              'text-stone-900 dark:text-stone-100'
+            )}
+          >
             The flame flickered out
           </h1>
 

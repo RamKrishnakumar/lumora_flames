@@ -1,0 +1,106 @@
+name: PR Quality & Preview
+
+# `pull_request` (not `pull_request_target`): the job runs with a read-only
+# token agains the merge commit. pull_request_target would run trusted
+# workflow code with write access against untrusted PR code - the standard
+# way repos get compromised. Keep it as-is.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+# One preview per PR. A second push while the first is still building cancels
+# it, so the deployed preveiw always matches the newest commit rather than
+# whichever job happened to finish last.
+concurrency:
+  group: pr-preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------------
+  # Gate 1: everything that can fail withou a deploy target.
+  # Split from the deploy so a lint failure cost ~40s, not a full build.
+  # ----------------------------------------------------------------------
+  quality:
+    name: Lint, format, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version:
+            24 # Node 12 is this projects's machine default and
+            # breaks every script with `Unexpected token ?`
+          cache: npm # caches ~/.npm keyed on package-lock.json
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Test
+        run: npm run test
+
+      # typechecks (`tsc -b`) and builds in one step, because that is what the
+      # build script does. A type error fails here.
+      - name: Build
+        run: npm run build
+
+  #-----------------------------------------------------------------------
+  # Gate 2: publish the preveiw
+  #-----------------------------------------------------------------------
+  deploy-preview:
+    name: Deploy preview
+    needs: quality # never publish something that failed a check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push to gh-pages
+      pull-requests: write # post the URL comment
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      # The repo name is read at runtime, so renaming the repo to LumoraFlames
+      # needs no edit here. Traiilng slash matters: Vite joins asset paths onto
+      # this string directly, the omitting it yeilds "/LummoraFlamespr-12/".
+      - name: Build for the preveiw subpath
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.number }}/
+        run: npm run build
+
+      # Github Pages servers 404.hmtl for any unmatched path. Beacuse index.html
+      # boots the router, which reads window.location itself, this on copy is
+      # what makes /about survive a hard refresh.
+      - name: Add SPA fallback
+        run: cp dist/index.html dist/404.html
+
+      - name: Publish to gh-pages/pr-${{ github.event.number }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          #Each PR gets its own folder, so preview never collide with each
+          # other or with production at the root.
+          destination_dir: pr-${{ github.event.number }}
+          commit_message: 'preview: PR #${{ github.event.number}} (${{github.sha }})'
+
+      # Upddates on commment instead of adding a new on per push, so a
+      # tweleve-commit PR doesn't end up with twelve identical links.
+      - name: Comment the preview URL
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            **Preview deployed** - https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.number }}/
+
+            Commit `${{ github.sha }}`. Updates on every push; removed when this PR closes.
+
+            Worth checking, since none of it is covered by tests: light **and** dark mode, phone/tablet/desktop widths, and reduced-motion.

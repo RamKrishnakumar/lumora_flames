@@ -1,0 +1,36 @@
+name: Cleanup PR Preview
+
+# Fires on close whether or not the PR merged — an abandoned PR's preview is
+# just as stale as a merged one's.
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # Check out only gh-pages. The PR's own code is irrelevant here, and a
+      # full clone of history would be wasted work.
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Remove the preview directory
+        env:
+          DIR: pr-${{ github.event.number }}
+        run: |
+          # -d, not -f: if the folder is already gone (re-run, or the preview
+          # never built because quality failed) that is success, not an error.
+          if [ ! -d "$DIR" ]; then
+            echo "No preview at $DIR — nothing to remove."
+            exit 0
+          fi
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -rq "$DIR"
+          git commit -m "cleanup: remove preview for PR #${{ github.event.number }}"
+          git push
