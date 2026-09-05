@@ -239,13 +239,14 @@ Comments that just narrate the next line are noise. Delete them.
 
 ### Verifying a change
 
-There is no test suite, so this is the whole safety net:
+Automated coverage stops at one file. `src/data/contact.test.ts` asserts the WhatsApp deep link and nothing else, because that link is the entire conversion path and it fails *silently* — a malformed number makes `wa.me` open an "invalid number" screen rather than throwing, so a typo still looks like a working button. Nothing renders a component or asserts a layout, so for everything else this list is the whole safety net:
 
 1. `npm run dev`, then exercise **every route the change can reach** — including the redirects.
 2. Both **light and dark** mode.
 3. **Phone, tablet, desktop** widths.
 4. With **reduced motion** enabled at the OS level.
-5. `npm run build` and `npm run lint` must both pass.
+5. `npm run lint`, `npm run format:check`, `npm run test` and `npm run build` must all pass — both deploy workflows gate on all four, so one red check blocks the deploy entirely.
 6. If you touched a GSAP plugin import, **check the built chunk sizes** — a static import of a heavy plugin can quietly quadruple the landing chunk.
+7. **Resize the window; don't only load at one size.** A pinned section re-measures on resize, and if its length and its height are derived from different sources they can disagree — Safari reports a stale `window.innerHeight` for a beat after layout has reflowed, which left the hero short with a blank band under it while Chrome looked perfect. Derive both from the same box; see the `end` callback in `HeroChamber`.
 
 Node v12 is the machine default and breaks every script with a bare `Unexpected token ?`. Use Node 24.
