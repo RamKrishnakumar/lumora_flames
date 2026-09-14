@@ -27,12 +27,16 @@ const HERO_VISUAL = CANDLE_CATEGORIES.find(
 )?.subCategories.find((s) => s.id === 'urli-diya')?.visual;
 
 /**
- * Scroll distance, in viewport heights, spent lighting the candle before the
- * page moves on. Roughly one flick of a trackpad — long enough for the ignition
- * to read as a deliberate beat, short enough that nobody feels held hostage by a
- * pinned screen.
+ * Scroll distance, as a multiple of the hero's own height, spent lighting the
+ * candle before the page moves on. Roughly one flick of a trackpad — long enough
+ * for the ignition to read as a deliberate beat, short enough that nobody feels
+ * held hostage by a pinned screen.
+ *
+ * The section is `min-h-[100svh]`, so this is a multiple of the viewport height
+ * too — but it is measured off the element, never off `window.innerHeight`. See
+ * the `end` callback in the ignition block for why that distinction matters.
  */
-const IGNITION_SCROLL_VH = 1.1;
+const IGNITION_SCROLL_SECTIONS = 1.1;
 
 /** Props for {@link HeroChamber}. */
 export interface HeroChamberProps {
@@ -118,7 +122,7 @@ export const HeroChamber: React.FC<HeroChamberProps> = ({ onScrollCue }) => {
   );
 
   /*
-   * Ignition. The hero pins for `IGNITION_SCROLL_VH` and that scroll distance
+   * Ignition. The hero pins for `IGNITION_SCROLL_SECTIONS` and that scroll distance
    * lights the candle: flame grows from nothing to full, the cast light pool
    * grows with it, embers fade in. Scrolling back shrinks it, and reaching the
    * top blows it out with smoke.
@@ -319,7 +323,27 @@ export const HeroChamber: React.FC<HeroChamberProps> = ({ onScrollCue }) => {
         scrollTrigger: {
           trigger: rootRef.current,
           start: 'top top',
-          end: () => `+=${window.innerHeight * IGNITION_SCROLL_VH}`,
+          /*
+           * Measured off the section, not `window.innerHeight`.
+           *
+           * The section's height comes from CSS (`min-h-[100svh]`) and the pin
+           * distance comes from JS, so if the two read different sources they can
+           * disagree — and on a resize in Safari they do. Safari keeps reporting
+           * the pre-resize `window.innerHeight` for a beat after layout has
+           * already reflowed, so a refresh triggered by the resize measured a
+           * 1028px-tall section while `innerHeight` still claimed 1327: 1460px of
+           * pinned scroll reserved for a screen 329px shorter than that. The
+           * spare padding on ScrollTrigger's pin-spacer has nothing in it, so the
+           * hero appeared to shrink with a blank band under it until the next
+           * reload. Chrome refreshes both together and never showed it.
+           *
+           * `offsetHeight` is the same layout the `100svh` produced, so the two
+           * numbers now come from one source and cannot drift apart — the same
+           * one-writer rule the flame's `--flame-intensity` follows above.
+           * ScrollTrigger reverts pins before it calls `end`, so this reads the
+           * natural height rather than a height it set on a previous pass.
+           */
+          end: () => `+=${(rootRef.current?.offsetHeight ?? 0) * IGNITION_SCROLL_SECTIONS}`,
           scrub: 0.6,
           pin: true,
           anticipatePin: 1,

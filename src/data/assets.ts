@@ -6,6 +6,11 @@
  * drop the new file into `src/data/images/**` and update the import below.
  */
 
+// Brand marks. `flameMark` is the traced vector of the logo flame — the same
+// artwork as `public/favicon.svg`, kept here as an import so in-page use is
+// fingerprinted. Edit both if the mark ever changes.
+import flameMark from './images/logo/flame-mark.svg';
+
 // Collection hero imagery
 import bespoke from './images/collections-landing/bespoke.png';
 import jarCandles from './images/collections-landing/jarCandles.jpeg';
@@ -20,6 +25,9 @@ import desserts from './images/deserts_beverages/desserts.png';
 import smoothie from './images/deserts_beverages/Smoothie.png';
 
 export const ASSET_IMAGES = {
+  brand: {
+    flameMark,
+  },
   categories: {
     bespoke,
     containerJar: jarCandles,

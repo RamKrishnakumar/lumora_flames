@@ -2,7 +2,7 @@
 
 Lumora Flames — marketing & catalog site for a handcrafted artisanal candle brand (festive urlis and diyas, bespoke fragrance blends, food-mimicking wax sculptures, and raw materials for DIY candle makers). No cart, no checkout, and no inquiry form; the conversion path is a direct message, via the WhatsApp and Instagram links at `/contact`.
 
-React 19 + Vite 8 + Tailwind v4 + GSAP. No backend, no tests.
+React 19 + Vite 8 + Tailwind v4 + GSAP. No backend. Tests cover one thing only — the WhatsApp deep link — so treat manual verification as the real safety net.
 
 ## Which doc to read when
 
@@ -28,12 +28,18 @@ export PATH="$HOME/.nvm/versions/node/v24.18.0/bin:$PATH"
 ```
 
 ```bash
-npm run dev      # vite dev server
-npm run build    # tsc -b && vite build
-npm run lint     # eslint
+npm run dev           # vite dev server
+npm run build         # tsc -b && vite build
+npm run lint          # eslint
+npm run test          # vitest run
+npm run format:check  # prettier --check .
 ```
 
-There is no test suite — verify changes by running `npm run dev` and checking the affected routes in both light and dark mode.
+**Both deploy workflows gate on all four of `lint`, `format:check`, `test` and `build`** — a failure in any one of them means no deploy, so run them before pushing, not just `build`.
+
+`npm run test` is a deliberately narrow suite, not a safety net. It asserts the WhatsApp deep link in `src/data/contact.ts` and nothing else, because that link is the site's entire conversion path and it fails *silently*: a malformed number makes `wa.me` open an "invalid number" screen rather than throwing, so a typo still looks like a working button. Nothing renders a component or asserts a layout.
+
+So verification is still manual — see [`docs/architecture.md#verifying-a-change`](docs/architecture.md#verifying-a-change) for the full checklist.
 
 ## Hard rules
 
